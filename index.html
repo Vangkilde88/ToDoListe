@@ -210,8 +210,12 @@
       height: 520px;
       overflow: hidden;
       border-radius: 18px;
-      background:
-        linear-gradient(to bottom, #cfe9ff 0%, #eaf6ff 45%, #cde8b0 100%);
+      background: linear-gradient(
+        to bottom,
+        #cfe9ff 0%,
+        #eaf6ff 45%,
+        #cde8b0 100%
+      );
     }
 
     .sun {
@@ -390,6 +394,72 @@
       }
     }
 
+    .lock-screen {
+      position: fixed;
+      inset: 0;
+      background: #eef5fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20000;
+      padding: 20px;
+    }
+
+    .lock-box {
+      background: white;
+      width: 100%;
+      max-width: 360px;
+      padding: 32px;
+      border-radius: 24px;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+
+    .lock-icon {
+      font-size: 54px;
+      margin-bottom: 10px;
+    }
+
+    .lock-box h2 {
+      margin: 8px 0;
+      font-size: 28px;
+    }
+
+    .lock-box p {
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+
+    .lock-box input {
+      width: 100%;
+      padding: 16px;
+      font-size: 28px;
+      text-align: center;
+      letter-spacing: 10px;
+      border: 2px solid #d1d5db;
+      border-radius: 14px;
+      margin-bottom: 12px;
+    }
+
+    .lock-box button {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      background: #111827;
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .pin-error {
+      color: #b91c1c;
+      margin-top: 12px;
+      font-weight: 600;
+      min-height: 20px;
+    }
+
     @media (max-width: 700px) {
       .app {
         padding: 10px;
@@ -431,7 +501,27 @@
 
 <body>
 
-<div class="app">
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-box">
+    <div class="lock-icon">🔐</div>
+    <h2>Forældreadgang</h2>
+    <p>Indtast kode for at åbne appen</p>
+
+    <input
+      id="pinInput"
+      type="password"
+      inputmode="numeric"
+      maxlength="4"
+      placeholder="••••"
+    >
+
+    <button onclick="checkPin()">Åbn appen</button>
+
+    <div id="pinError" class="pin-error"></div>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none;">
 
   <h1>🏡 Familie ToDo</h1>
   <div class="subtitle">Klar til dagen — og klar til natten</div>
@@ -457,7 +547,9 @@
 
   <div class="mountain-section">
     <h2 class="mountain-title">🚴 Vejen mod toppen</h2>
-    <div class="mountain-subtitle">Hver aften under 10 minutter giver ⭐ 1 stjerne</div>
+    <div class="mountain-subtitle">
+      Morgen færdig = ⭐ 1 · Aften under 10 min = ⭐ 1
+    </div>
 
     <div class="mountain" id="mountain">
       <div class="sun">☀️</div>
@@ -525,7 +617,8 @@ function todayKey() {
 function defaultKidData() {
   return {
     stars: 0,
-    lastRewardDate: null,
+    lastMorningRewardDate: null,
+    lastEveningRewardDate: null,
     eveningStart: null,
     eveningFinished: false,
     eveningFailed: false
@@ -533,14 +626,17 @@ function defaultKidData() {
 }
 
 function hentData() {
-  const saved = localStorage.getItem("familieTodoV2");
+  const saved = localStorage.getItem("familieTodoV3");
 
   if (saved) {
     return JSON.parse(saved);
   }
 
   const kids = {};
-  børn.forEach(b => kids[b] = defaultKidData());
+
+  børn.forEach(b => {
+    kids[b] = defaultKidData();
+  });
 
   return {
     date: todayKey(),
@@ -555,30 +651,49 @@ function hentData() {
 let data = hentData();
 
 function sikreDataStruktur() {
-  if (!data.kids) data.kids = {};
+
+  if (!data.kids) {
+    data.kids = {};
+  }
 
   børn.forEach(barn => {
+
     if (!data.kids[barn]) {
       data.kids[barn] = defaultKidData();
     }
+
+    if (data.kids[barn].lastMorningRewardDate === undefined) {
+      data.kids[barn].lastMorningRewardDate = null;
+    }
+
+    if (data.kids[barn].lastEveningRewardDate === undefined) {
+      data.kids[barn].lastEveningRewardDate = null;
+    }
+
   });
 
   if (!data.checks) {
-    data.checks = { morgen: {}, aften: {} };
+    data.checks = {
+      morgen: {},
+      aften: {}
+    };
   }
 }
 
 sikreDataStruktur();
 
 function gemData() {
-  localStorage.setItem("familieTodoV2", JSON.stringify(data));
+  localStorage.setItem("familieTodoV3", JSON.stringify(data));
 }
 
 function dagsNulstilling() {
+
   const idag = todayKey();
 
   if (data.date !== idag) {
+
     data.date = idag;
+
     data.checks = {
       morgen: {},
       aften: {}
@@ -605,6 +720,7 @@ function jerseyForStars(stars) {
 }
 
 function visListe(type) {
+
   aktuelListe = type;
 
   document.getElementById("morgenBtn")
@@ -620,6 +736,7 @@ function visListe(type) {
 }
 
 function bygHeader() {
+
   const head = document.getElementById("tableHead");
   head.innerHTML = "";
 
@@ -630,6 +747,7 @@ function bygHeader() {
   row.appendChild(first);
 
   børn.forEach(barn => {
+
     const th = document.createElement("th");
 
     const wrap = document.createElement("div");
@@ -651,6 +769,7 @@ function bygHeader() {
     wrap.appendChild(stars);
 
     if (aktuelListe === "aften") {
+
       const timer = document.createElement("div");
       timer.id = "timer-" + barn;
       timer.className = "timer";
@@ -658,9 +777,13 @@ function bygHeader() {
 
       const start = document.createElement("button");
       start.className = "start-btn";
-      start.textContent = data.kids[barn].eveningStart ? "I gang" : "START ⏱️";
+      start.textContent =
+        data.kids[barn].eveningStart ? "I gang" : "START ⏱️";
 
-      if (data.kids[barn].eveningStart || data.kids[barn].eveningFinished) {
+      if (
+        data.kids[barn].eveningStart ||
+        data.kids[barn].eveningFinished
+      ) {
         start.disabled = true;
       }
 
@@ -678,6 +801,7 @@ function bygHeader() {
 }
 
 function bygTabel() {
+
   bygHeader();
 
   const tbody = document.getElementById("todoBody");
@@ -699,7 +823,9 @@ function bygTabel() {
       btn.className = "check";
 
       const key = barn + "_" + index;
-      const done = data.checks[aktuelListe][key] === true;
+
+      const done =
+        data.checks[aktuelListe][key] === true;
 
       btn.textContent = done ? "✅" : "⬜";
       btn.classList.toggle("done", done);
@@ -707,7 +833,12 @@ function bygTabel() {
       btn.onclick = function() {
 
         data.checks[aktuelListe][key] = !done;
+
         gemData();
+
+        if (aktuelListe === "morgen") {
+          checkMorningCompletion(barn);
+        }
 
         if (aktuelListe === "aften") {
           checkEveningCompletion(barn);
@@ -726,17 +857,53 @@ function bygTabel() {
   updateMountain();
 }
 
+function allMorningDone(barn) {
+
+  return opgaver.morgen.every((_, index) => {
+    return data.checks.morgen[barn + "_" + index] === true;
+  });
+}
+
 function allEveningDone(barn) {
+
   return opgaver.aften.every((_, index) => {
     return data.checks.aften[barn + "_" + index] === true;
   });
 }
 
+function checkMorningCompletion(barn) {
+
+  if (!allMorningDone(barn)) return;
+
+  const kid = data.kids[barn];
+
+  if (
+    kid.lastMorningRewardDate === todayKey()
+  ) {
+    return;
+  }
+
+  kid.lastMorningRewardDate = todayKey();
+  kid.stars += 1;
+
+  gemData();
+
+  showSuccess(
+    barn,
+    kid.stars,
+    "morgen"
+  );
+
+  updateMountain();
+}
+
 function startTimer(barn) {
+
   if (data.kids[barn].eveningStart) return;
 
   data.kids[barn].eveningStart = Date.now();
   data.kids[barn].eveningFailed = false;
+
   gemData();
 
   startTimerInterval(barn);
@@ -744,6 +911,7 @@ function startTimer(barn) {
 }
 
 function startTimerInterval(barn) {
+
   clearInterval(timerIntervals[barn]);
 
   timerIntervals[barn] = setInterval(() => {
@@ -752,105 +920,169 @@ function startTimerInterval(barn) {
 }
 
 function remainingMs(barn) {
+
   const start = data.kids[barn].eveningStart;
 
-  if (!start) return 10 * 60 * 1000;
+  if (!start) {
+    return 10 * 60 * 1000;
+  }
 
   return 10 * 60 * 1000 - (Date.now() - start);
 }
 
 function timerText(barn) {
+
   const kid = data.kids[barn];
 
-  if (kid.eveningFinished) return "✅ Klaret";
-  if (kid.eveningFailed) return "⏱️ Tiden gik";
+  if (kid.eveningFinished) {
+    return "✅ Klaret";
+  }
 
-  if (!kid.eveningStart) return "10:00";
+  if (kid.eveningFailed) {
+    return "⏱️ Tiden gik";
+  }
 
-  const ms = Math.max(0, remainingMs(barn));
+  if (!kid.eveningStart) {
+    return "10:00";
+  }
 
-  const totalSeconds = Math.floor(ms / 1000);
-  const min = Math.floor(totalSeconds / 60);
-  const sec = totalSeconds % 60;
+  const ms = Math.max(
+    0,
+    remainingMs(barn)
+  );
 
-  return min + ":" + String(sec).padStart(2, "0");
+  const totalSeconds =
+    Math.floor(ms / 1000);
+
+  const min =
+    Math.floor(totalSeconds / 60);
+
+  const sec =
+    totalSeconds % 60;
+
+  return min + ":" +
+    String(sec).padStart(2, "0");
 }
 
 function updateTimerDisplay(barn) {
-  const el = document.getElementById("timer-" + barn);
+
+  const el =
+    document.getElementById("timer-" + barn);
+
   if (!el) return;
 
   const kid = data.kids[barn];
 
   if (kid.eveningFinished) {
+
     el.textContent = "✅ Klaret";
     el.className = "timer success";
+
     clearInterval(timerIntervals[barn]);
+
     return;
   }
 
-  const remaining = remainingMs(barn);
+  const remaining =
+    remainingMs(barn);
 
   if (remaining <= 0) {
+
     kid.eveningFailed = true;
+
     gemData();
 
     el.textContent = "⏱️ Tiden gik";
     el.className = "timer failed";
 
     clearInterval(timerIntervals[barn]);
+
     return;
   }
 
-  el.textContent = timerText(barn);
-  el.className = "timer running";
+  el.textContent =
+    timerText(barn);
+
+  el.className =
+    "timer running";
 }
 
 function checkEveningCompletion(barn) {
 
   if (!allEveningDone(barn)) return;
 
-  const kid = data.kids[barn];
+  const kid =
+    data.kids[barn];
 
   if (!kid.eveningStart) return;
-  if (kid.eveningFinished) return;
-  if (kid.lastRewardDate === todayKey()) return;
 
-  const remaining = remainingMs(barn);
+  if (kid.eveningFinished) return;
+
+  if (
+    kid.lastEveningRewardDate === todayKey()
+  ) {
+    return;
+  }
+
+  const remaining =
+    remainingMs(barn);
 
   if (remaining > 0) {
 
     kid.eveningFinished = true;
-    kid.lastRewardDate = todayKey();
+    kid.lastEveningRewardDate = todayKey();
     kid.stars += 1;
 
     clearInterval(timerIntervals[barn]);
 
     gemData();
 
-    showSuccess(barn, kid.stars);
+    showSuccess(
+      barn,
+      kid.stars,
+      "aften"
+    );
+
     updateMountain();
 
   } else {
+
     kid.eveningFailed = true;
+
     gemData();
   }
 }
 
-function showSuccess(barn, stars) {
+function showSuccess(barn, stars, type) {
 
   launchConfetti();
 
-  const popup = document.createElement("div");
-  popup.className = "success-popup";
+  const popup =
+    document.createElement("div");
 
-  popup.innerHTML = `
-    <div class="emoji">🚴💨⭐</div>
-    <h2>${barn} klarede det!</h2>
-    <p>Under 10 minutter</p>
-    <p><strong>⭐ +1 stjerne</strong></p>
-    <p>${jerseyForStars(stars)} ${stars} stjerner i alt</p>
-  `;
+  popup.className =
+    "success-popup";
+
+  if (type === "morgen") {
+
+    popup.innerHTML = `
+      <div class="emoji">🌅🚴⭐</div>
+      <h2>${barn} er klar!</h2>
+      <p>Alle morgenopgaver klaret</p>
+      <p><strong>⭐ +1 stjerne</strong></p>
+      <p>${jerseyForStars(stars)} ${stars} stjerner i alt</p>
+    `;
+
+  } else {
+
+    popup.innerHTML = `
+      <div class="emoji">🚴💨⭐</div>
+      <h2>${barn} klarede det!</h2>
+      <p>Alle aftenopgaver klaret inden 10 minutter</p>
+      <p><strong>⭐ +1 stjerne</strong></p>
+      <p>${jerseyForStars(stars)} ${stars} stjerner i alt</p>
+    `;
+  }
 
   document.body.appendChild(popup);
 
@@ -860,37 +1092,69 @@ function showSuccess(barn, stars) {
 }
 
 function launchConfetti() {
-  const emojis = ["🎉","⭐","🚴","✨","🏁"];
+
+  const emojis = [
+    "🎉",
+    "⭐",
+    "🚴",
+    "✨",
+    "🏁"
+  ];
 
   for (let i = 0; i < 55; i++) {
-    const el = document.createElement("div");
 
-    el.className = "confetti";
-    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    const el =
+      document.createElement("div");
 
-    el.style.left = Math.random() * 100 + "vw";
-    el.style.animationDuration = (2 + Math.random() * 2.5) + "s";
-    el.style.fontSize = (18 + Math.random() * 18) + "px";
+    el.className =
+      "confetti";
+
+    el.textContent =
+      emojis[
+        Math.floor(
+          Math.random() * emojis.length
+        )
+      ];
+
+    el.style.left =
+      Math.random() * 100 + "vw";
+
+    el.style.animationDuration =
+      (2 + Math.random() * 2.5) + "s";
+
+    el.style.fontSize =
+      (18 + Math.random() * 18) + "px";
 
     document.body.appendChild(el);
 
-    setTimeout(() => el.remove(), 5000);
+    setTimeout(() => {
+      el.remove();
+    }, 5000);
   }
 }
 
 function riderPosition(stars, index) {
 
-  const capped = Math.min(stars, 30);
-  const progress = capped / 30;
+  const capped =
+    Math.min(stars, 30);
 
-  const bottom = 62 + progress * 385;
+  const progress =
+    capped / 30;
 
-  const spread = 120 * (1 - progress);
+  const bottom =
+    62 + progress * 385;
 
-  const offsets = [-0.75, -0.25, 0.25, 0.75];
-  const xOffset = spread * offsets[index];
+  const spread =
+    120 * (1 - progress);
 
-  const left = 50 + xOffset / 7;
+  const offsets =
+    [-0.75, -0.25, 0.25, 0.75];
+
+  const xOffset =
+    spread * offsets[index];
+
+  const left =
+    50 + xOffset / 7;
 
   return {
     left,
@@ -902,13 +1166,25 @@ function updateMountain() {
 
   børn.forEach((barn, index) => {
 
-    const stars = data.kids[barn].stars;
-    const rider = document.getElementById("rider-" + barn);
+    const stars =
+      data.kids[barn].stars;
 
-    const pos = riderPosition(stars, index);
+    const rider =
+      document.getElementById(
+        "rider-" + barn
+      );
 
-    rider.style.left = pos.left + "%";
-    rider.style.bottom = pos.bottom + "px";
+    const pos =
+      riderPosition(
+        stars,
+        index
+      );
+
+    rider.style.left =
+      pos.left + "%";
+
+    rider.style.bottom =
+      pos.bottom + "px";
 
     rider.innerHTML = `
       <span class="shirt">${jerseyForStars(stars)}</span>
@@ -919,26 +1195,72 @@ function updateMountain() {
 }
 
 function resumeTimers() {
+
   børn.forEach(barn => {
-    const kid = data.kids[barn];
+
+    const kid =
+      data.kids[barn];
 
     if (
       kid.eveningStart &&
       !kid.eveningFinished &&
       !kid.eveningFailed
     ) {
+
       if (remainingMs(barn) <= 0) {
+
         kid.eveningFailed = true;
+
         gemData();
+
       } else {
+
         startTimerInterval(barn);
       }
     }
   });
 }
 
+function checkPin() {
+
+  const pin =
+    document.getElementById("pinInput").value;
+
+  if (pin === "0605") {
+
+    document.getElementById(
+      "lockScreen"
+    ).style.display = "none";
+
+    document.getElementById(
+      "mainApp"
+    ).style.display = "block";
+
+    bygTabel();
+    updateMountain();
+
+  } else {
+
+    document.getElementById(
+      "pinError"
+    ).textContent = "Forkert kode";
+
+    document.getElementById(
+      "pinInput"
+    ).value = "";
+  }
+}
+
+document
+  .getElementById("pinInput")
+  .addEventListener("keydown", function(event) {
+
+    if (event.key === "Enter") {
+      checkPin();
+    }
+  });
+
 resumeTimers();
-bygTabel();
 
 </script>
 
