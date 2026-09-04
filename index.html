@@ -6,7 +6,7 @@
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#f4f7fb">
+  <meta name="theme-color" content="#eef5fb">
 
   <title>Familie ToDo</title>
 
@@ -18,40 +18,40 @@
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f4f7fb;
+      background: #eef5fb;
       color: #1f2937;
     }
 
     .app {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 18px;
     }
 
     h1 {
       text-align: center;
-      margin: 10px 0 6px;
+      margin: 8px 0 4px;
       font-size: 34px;
     }
 
     .subtitle {
       text-align: center;
-      margin-bottom: 24px;
       color: #6b7280;
+      margin-bottom: 20px;
     }
 
     .menu {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 24px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     .menu button {
       border: none;
       border-radius: 18px;
-      padding: 20px;
-      font-size: 24px;
+      padding: 18px;
+      font-size: 23px;
       font-weight: 700;
       cursor: pointer;
       background: white;
@@ -65,7 +65,7 @@
     .section-title {
       text-align: center;
       font-size: 28px;
-      margin: 10px 0 18px;
+      margin: 10px 0 16px;
     }
 
     .table-wrap {
@@ -77,7 +77,7 @@
 
     table {
       width: 100%;
-      min-width: 760px;
+      min-width: 850px;
       border-collapse: collapse;
     }
 
@@ -86,7 +86,7 @@
       border-bottom: 1px solid #e5e7eb;
       border-right: 1px solid #e5e7eb;
       text-align: center;
-      padding: 14px 10px;
+      padding: 12px 8px;
     }
 
     th:last-child,
@@ -100,27 +100,78 @@
 
     th {
       background: #eef2f7;
-      font-size: 18px;
+      font-size: 17px;
+      vertical-align: top;
     }
 
     th:first-child,
     td:first-child {
       text-align: left;
-      min-width: 250px;
+      min-width: 240px;
     }
 
     td:first-child {
-      font-size: 19px;
+      font-size: 18px;
       font-weight: 600;
     }
 
+    .kid-header {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .jersey {
+      font-size: 22px;
+    }
+
+    .stars {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .timer {
+      font-size: 18px;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .timer.running {
+      color: #b45309;
+    }
+
+    .timer.success {
+      color: #15803d;
+    }
+
+    .timer.failed {
+      color: #b91c1c;
+    }
+
+    .start-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #111827;
+      color: white;
+      margin-top: 4px;
+    }
+
+    .start-btn:disabled {
+      background: #9ca3af;
+      cursor: default;
+    }
+
     .check {
-      width: 54px;
-      height: 54px;
+      width: 52px;
+      height: 52px;
       border-radius: 14px;
       border: 2px solid #d1d5db;
       background: #f9fafb;
-      font-size: 30px;
+      font-size: 28px;
       cursor: pointer;
       transition: transform 0.1s ease, background 0.2s ease;
     }
@@ -134,27 +185,214 @@
       border-color: #86efac;
     }
 
-    .progress {
-      margin-top: 18px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: 600;
+    .mountain-section {
+      margin-top: 28px;
+      background: white;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
     }
 
-    .reset {
-      display: block;
-      margin: 18px auto 0;
-      border: none;
-      background: #e5e7eb;
-      padding: 12px 18px;
-      border-radius: 12px;
+    .mountain-title {
+      text-align: center;
+      font-size: 26px;
+      margin: 0 0 8px;
+    }
+
+    .mountain-subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 18px;
+    }
+
+    .mountain {
+      position: relative;
+      height: 520px;
+      overflow: hidden;
+      border-radius: 18px;
+      background:
+        linear-gradient(to bottom, #cfe9ff 0%, #eaf6ff 45%, #cde8b0 100%);
+    }
+
+    .sun {
+      position: absolute;
+      top: 24px;
+      right: 32px;
+      font-size: 50px;
+    }
+
+    .cloud {
+      position: absolute;
+      font-size: 42px;
+      opacity: 0.95;
+    }
+
+    .cloud.c1 {
+      top: 50px;
+      left: 8%;
+    }
+
+    .cloud.c2 {
+      top: 110px;
+      right: 15%;
+    }
+
+    .peak {
+      position: absolute;
+      left: 50%;
+      bottom: 55px;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 360px solid transparent;
+      border-right: 360px solid transparent;
+      border-bottom: 420px solid #6b7280;
+    }
+
+    .snow {
+      position: absolute;
+      left: 50%;
+      bottom: 365px;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 90px solid transparent;
+      border-right: 90px solid transparent;
+      border-bottom: 105px solid white;
+      z-index: 2;
+    }
+
+    .goal {
+      position: absolute;
+      left: 50%;
+      top: 18px;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 6;
+      font-weight: 800;
       font-size: 16px;
-      cursor: pointer;
+    }
+
+    .goal .big {
+      font-size: 38px;
+      display: block;
+    }
+
+    .marker {
+      position: absolute;
+      left: 18px;
+      z-index: 5;
+      background: rgba(255,255,255,0.88);
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+    }
+
+    .m5  { bottom: 125px; }
+    .m10 { bottom: 215px; }
+    .m20 { bottom: 330px; }
+
+    .rider {
+      position: absolute;
+      z-index: 8;
+      transform: translate(-50%, 50%);
+      transition: left 1.2s ease, bottom 1.2s ease;
+      text-align: center;
+      min-width: 90px;
+    }
+
+    .rider .bike {
+      font-size: 32px;
+      display: block;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+    }
+
+    .rider .name {
+      display: inline-block;
+      margin-top: 2px;
+      background: rgba(255,255,255,0.92);
+      padding: 3px 7px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .rider .shirt {
+      display: block;
+      font-size: 18px;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 15px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .legend div {
+      background: #f3f4f6;
+      border-radius: 12px;
+      padding: 8px;
+    }
+
+    .confetti {
+      position: fixed;
+      top: -20px;
+      z-index: 9999;
+      font-size: 24px;
+      pointer-events: none;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0.9;
+      }
+    }
+
+    .success-popup {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      z-index: 10000;
+      background: white;
+      border-radius: 24px;
+      padding: 28px 36px;
+      text-align: center;
+      box-shadow: 0 14px 50px rgba(0,0,0,0.28);
+      animation: pop 0.4s ease forwards;
+      min-width: 280px;
+    }
+
+    .success-popup .emoji {
+      font-size: 64px;
+    }
+
+    .success-popup h2 {
+      margin: 8px 0;
+    }
+
+    .success-popup p {
+      margin: 5px 0;
+      font-size: 18px;
+    }
+
+    @keyframes pop {
+      to {
+        transform: translate(-50%, -50%) scale(1);
+      }
     }
 
     @media (max-width: 700px) {
       .app {
-        padding: 12px;
+        padding: 10px;
       }
 
       h1 {
@@ -162,12 +400,30 @@
       }
 
       .menu button {
-        font-size: 20px;
-        padding: 16px 10px;
+        font-size: 19px;
+        padding: 14px 8px;
       }
 
-      .section-title {
-        font-size: 24px;
+      .mountain {
+        height: 430px;
+      }
+
+      .peak {
+        border-left-width: 270px;
+        border-right-width: 270px;
+        border-bottom-width: 340px;
+      }
+
+      .snow {
+        bottom: 302px;
+      }
+
+      .m5  { bottom: 105px; }
+      .m10 { bottom: 170px; }
+      .m20 { bottom: 260px; }
+
+      .legend {
+        grid-template-columns: 1fr 1fr;
       }
     }
   </style>
@@ -194,25 +450,45 @@
 
   <div class="table-wrap">
     <table>
-      <thead>
-        <tr>
-          <th>Opgave</th>
-          <th>Vester</th>
-          <th>Bertil</th>
-          <th>Arthur</th>
-          <th>Leonora</th>
-        </tr>
-      </thead>
-
+      <thead id="tableHead"></thead>
       <tbody id="todoBody"></tbody>
     </table>
   </div>
 
-  <div id="progress" class="progress"></div>
+  <div class="mountain-section">
+    <h2 class="mountain-title">🚴 Vejen mod toppen</h2>
+    <div class="mountain-subtitle">Hver aften under 10 minutter giver ⭐ 1 stjerne</div>
 
-  <button class="reset" onclick="nulstilAktuelListe()">
-    Nulstil denne liste
-  </button>
+    <div class="mountain" id="mountain">
+      <div class="sun">☀️</div>
+      <div class="cloud c1">☁️</div>
+      <div class="cloud c2">☁️</div>
+
+      <div class="peak"></div>
+      <div class="snow"></div>
+
+      <div class="goal">
+        <span class="big">🌈🏆</span>
+        30 ⭐ VERDENSMESTER
+      </div>
+
+      <div class="marker m5">⚪🔴 5 ⭐</div>
+      <div class="marker m10">🟢 10 ⭐</div>
+      <div class="marker m20">🟡 20 ⭐</div>
+
+      <div id="rider-Vester" class="rider"></div>
+      <div id="rider-Bertil" class="rider"></div>
+      <div id="rider-Arthur" class="rider"></div>
+      <div id="rider-Leonora" class="rider"></div>
+    </div>
+
+    <div class="legend">
+      <div>⚪🔴 5 ⭐<br>Bjergtrøjen</div>
+      <div>🟢 10 ⭐<br>Pointtrøjen</div>
+      <div>🟡 20 ⭐<br>Den gule trøje</div>
+      <div>🌈 30 ⭐<br>Verdensmester</div>
+    </div>
+  </div>
 
 </div>
 
@@ -240,31 +516,102 @@ const opgaver = {
 };
 
 let aktuelListe = "morgen";
+let timerIntervals = {};
+
+function todayKey() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function defaultKidData() {
+  return {
+    stars: 0,
+    lastRewardDate: null,
+    eveningStart: null,
+    eveningFinished: false,
+    eveningFailed: false
+  };
+}
 
 function hentData() {
-  const gemt = localStorage.getItem("familieTodo");
+  const saved = localStorage.getItem("familieTodoV2");
 
-  if (gemt) {
-    return JSON.parse(gemt);
+  if (saved) {
+    return JSON.parse(saved);
   }
 
+  const kids = {};
+  børn.forEach(b => kids[b] = defaultKidData());
+
   return {
-    morgen: {},
-    aften: {}
+    date: todayKey(),
+    checks: {
+      morgen: {},
+      aften: {}
+    },
+    kids
   };
 }
 
 let data = hentData();
 
+function sikreDataStruktur() {
+  if (!data.kids) data.kids = {};
+
+  børn.forEach(barn => {
+    if (!data.kids[barn]) {
+      data.kids[barn] = defaultKidData();
+    }
+  });
+
+  if (!data.checks) {
+    data.checks = { morgen: {}, aften: {} };
+  }
+}
+
+sikreDataStruktur();
+
 function gemData() {
-  localStorage.setItem("familieTodo", JSON.stringify(data));
+  localStorage.setItem("familieTodoV2", JSON.stringify(data));
+}
+
+function dagsNulstilling() {
+  const idag = todayKey();
+
+  if (data.date !== idag) {
+    data.date = idag;
+    data.checks = {
+      morgen: {},
+      aften: {}
+    };
+
+    børn.forEach(barn => {
+      data.kids[barn].eveningStart = null;
+      data.kids[barn].eveningFinished = false;
+      data.kids[barn].eveningFailed = false;
+    });
+
+    gemData();
+  }
+}
+
+dagsNulstilling();
+
+function jerseyForStars(stars) {
+  if (stars >= 30) return "🌈";
+  if (stars >= 20) return "🟡";
+  if (stars >= 10) return "🟢";
+  if (stars >= 5) return "⚪🔴";
+  return "🚴";
 }
 
 function visListe(type) {
   aktuelListe = type;
 
-  document.getElementById("morgenBtn").classList.toggle("active", type === "morgen");
-  document.getElementById("aftenBtn").classList.toggle("active", type === "aften");
+  document.getElementById("morgenBtn")
+    .classList.toggle("active", type === "morgen");
+
+  document.getElementById("aftenBtn")
+    .classList.toggle("active", type === "aften");
 
   document.getElementById("sectionTitle").textContent =
     type === "morgen" ? "🌅 Morgen" : "🌙 Aften";
@@ -272,87 +619,325 @@ function visListe(type) {
   bygTabel();
 }
 
+function bygHeader() {
+  const head = document.getElementById("tableHead");
+  head.innerHTML = "";
+
+  const row = document.createElement("tr");
+
+  const first = document.createElement("th");
+  first.textContent = "Opgave";
+  row.appendChild(first);
+
+  børn.forEach(barn => {
+    const th = document.createElement("th");
+
+    const wrap = document.createElement("div");
+    wrap.className = "kid-header";
+
+    const shirt = document.createElement("div");
+    shirt.className = "jersey";
+    shirt.textContent = jerseyForStars(data.kids[barn].stars);
+
+    const name = document.createElement("div");
+    name.textContent = barn;
+
+    const stars = document.createElement("div");
+    stars.className = "stars";
+    stars.textContent = "⭐ " + data.kids[barn].stars;
+
+    wrap.appendChild(shirt);
+    wrap.appendChild(name);
+    wrap.appendChild(stars);
+
+    if (aktuelListe === "aften") {
+      const timer = document.createElement("div");
+      timer.id = "timer-" + barn;
+      timer.className = "timer";
+      timer.textContent = timerText(barn);
+
+      const start = document.createElement("button");
+      start.className = "start-btn";
+      start.textContent = data.kids[barn].eveningStart ? "I gang" : "START ⏱️";
+
+      if (data.kids[barn].eveningStart || data.kids[barn].eveningFinished) {
+        start.disabled = true;
+      }
+
+      start.onclick = () => startTimer(barn);
+
+      wrap.appendChild(timer);
+      wrap.appendChild(start);
+    }
+
+    th.appendChild(wrap);
+    row.appendChild(th);
+  });
+
+  head.appendChild(row);
+}
+
 function bygTabel() {
+  bygHeader();
+
   const tbody = document.getElementById("todoBody");
   tbody.innerHTML = "";
 
-  opgaver[aktuelListe].forEach((opgave, opgaveIndex) => {
+  opgaver[aktuelListe].forEach((opgave, index) => {
 
-    const række = document.createElement("tr");
+    const row = document.createElement("tr");
 
-    const opgaveFelt = document.createElement("td");
-    opgaveFelt.textContent = opgave;
-    række.appendChild(opgaveFelt);
+    const taskCell = document.createElement("td");
+    taskCell.textContent = opgave;
+    row.appendChild(taskCell);
 
-    børn.forEach((barn) => {
+    børn.forEach(barn => {
 
-      const celle = document.createElement("td");
+      const cell = document.createElement("td");
 
-      const knap = document.createElement("button");
-      knap.className = "check";
+      const btn = document.createElement("button");
+      btn.className = "check";
 
-      const nøgle = barn + "_" + opgaveIndex;
-      const erFærdig = data[aktuelListe][nøgle] === true;
+      const key = barn + "_" + index;
+      const done = data.checks[aktuelListe][key] === true;
 
-      knap.textContent = erFærdig ? "✅" : "⬜";
-      knap.classList.toggle("done", erFærdig);
+      btn.textContent = done ? "✅" : "⬜";
+      btn.classList.toggle("done", done);
 
-      knap.onclick = function() {
+      btn.onclick = function() {
 
-        const nyStatus = !(data[aktuelListe][nøgle] === true);
-
-        data[aktuelListe][nøgle] = nyStatus;
-
+        data.checks[aktuelListe][key] = !done;
         gemData();
+
+        if (aktuelListe === "aften") {
+          checkEveningCompletion(barn);
+        }
+
         bygTabel();
       };
 
-      celle.appendChild(knap);
-      række.appendChild(celle);
+      cell.appendChild(btn);
+      row.appendChild(cell);
     });
 
-    tbody.appendChild(række);
+    tbody.appendChild(row);
   });
 
-  opdaterStatus();
+  updateMountain();
 }
 
-function opdaterStatus() {
-
-  const total =
-    opgaver[aktuelListe].length * børn.length;
-
-  let færdige = 0;
-
-  børn.forEach((barn) => {
-    opgaver[aktuelListe].forEach((_, index) => {
-
-      const nøgle = barn + "_" + index;
-
-      if (data[aktuelListe][nøgle] === true) {
-        færdige++;
-      }
-
-    });
+function allEveningDone(barn) {
+  return opgaver.aften.every((_, index) => {
+    return data.checks.aften[barn + "_" + index] === true;
   });
-
-  document.getElementById("progress").textContent =
-    færdige + " af " + total + " opgaver er klaret";
 }
 
-function nulstilAktuelListe() {
+function startTimer(barn) {
+  if (data.kids[barn].eveningStart) return;
 
-  const bekræft = confirm(
-    "Vil du nulstille alle krydser på denne liste?"
-  );
-
-  if (!bekræft) return;
-
-  data[aktuelListe] = {};
+  data.kids[barn].eveningStart = Date.now();
+  data.kids[barn].eveningFailed = false;
   gemData();
+
+  startTimerInterval(barn);
   bygTabel();
 }
 
+function startTimerInterval(barn) {
+  clearInterval(timerIntervals[barn]);
+
+  timerIntervals[barn] = setInterval(() => {
+    updateTimerDisplay(barn);
+  }, 500);
+}
+
+function remainingMs(barn) {
+  const start = data.kids[barn].eveningStart;
+
+  if (!start) return 10 * 60 * 1000;
+
+  return 10 * 60 * 1000 - (Date.now() - start);
+}
+
+function timerText(barn) {
+  const kid = data.kids[barn];
+
+  if (kid.eveningFinished) return "✅ Klaret";
+  if (kid.eveningFailed) return "⏱️ Tiden gik";
+
+  if (!kid.eveningStart) return "10:00";
+
+  const ms = Math.max(0, remainingMs(barn));
+
+  const totalSeconds = Math.floor(ms / 1000);
+  const min = Math.floor(totalSeconds / 60);
+  const sec = totalSeconds % 60;
+
+  return min + ":" + String(sec).padStart(2, "0");
+}
+
+function updateTimerDisplay(barn) {
+  const el = document.getElementById("timer-" + barn);
+  if (!el) return;
+
+  const kid = data.kids[barn];
+
+  if (kid.eveningFinished) {
+    el.textContent = "✅ Klaret";
+    el.className = "timer success";
+    clearInterval(timerIntervals[barn]);
+    return;
+  }
+
+  const remaining = remainingMs(barn);
+
+  if (remaining <= 0) {
+    kid.eveningFailed = true;
+    gemData();
+
+    el.textContent = "⏱️ Tiden gik";
+    el.className = "timer failed";
+
+    clearInterval(timerIntervals[barn]);
+    return;
+  }
+
+  el.textContent = timerText(barn);
+  el.className = "timer running";
+}
+
+function checkEveningCompletion(barn) {
+
+  if (!allEveningDone(barn)) return;
+
+  const kid = data.kids[barn];
+
+  if (!kid.eveningStart) return;
+  if (kid.eveningFinished) return;
+  if (kid.lastRewardDate === todayKey()) return;
+
+  const remaining = remainingMs(barn);
+
+  if (remaining > 0) {
+
+    kid.eveningFinished = true;
+    kid.lastRewardDate = todayKey();
+    kid.stars += 1;
+
+    clearInterval(timerIntervals[barn]);
+
+    gemData();
+
+    showSuccess(barn, kid.stars);
+    updateMountain();
+
+  } else {
+    kid.eveningFailed = true;
+    gemData();
+  }
+}
+
+function showSuccess(barn, stars) {
+
+  launchConfetti();
+
+  const popup = document.createElement("div");
+  popup.className = "success-popup";
+
+  popup.innerHTML = `
+    <div class="emoji">🚴💨⭐</div>
+    <h2>${barn} klarede det!</h2>
+    <p>Under 10 minutter</p>
+    <p><strong>⭐ +1 stjerne</strong></p>
+    <p>${jerseyForStars(stars)} ${stars} stjerner i alt</p>
+  `;
+
+  document.body.appendChild(popup);
+
+  setTimeout(() => {
+    popup.remove();
+  }, 3000);
+}
+
+function launchConfetti() {
+  const emojis = ["🎉","⭐","🚴","✨","🏁"];
+
+  for (let i = 0; i < 55; i++) {
+    const el = document.createElement("div");
+
+    el.className = "confetti";
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+    el.style.left = Math.random() * 100 + "vw";
+    el.style.animationDuration = (2 + Math.random() * 2.5) + "s";
+    el.style.fontSize = (18 + Math.random() * 18) + "px";
+
+    document.body.appendChild(el);
+
+    setTimeout(() => el.remove(), 5000);
+  }
+}
+
+function riderPosition(stars, index) {
+
+  const capped = Math.min(stars, 30);
+  const progress = capped / 30;
+
+  const bottom = 62 + progress * 385;
+
+  const spread = 120 * (1 - progress);
+
+  const offsets = [-0.75, -0.25, 0.25, 0.75];
+  const xOffset = spread * offsets[index];
+
+  const left = 50 + xOffset / 7;
+
+  return {
+    left,
+    bottom
+  };
+}
+
+function updateMountain() {
+
+  børn.forEach((barn, index) => {
+
+    const stars = data.kids[barn].stars;
+    const rider = document.getElementById("rider-" + barn);
+
+    const pos = riderPosition(stars, index);
+
+    rider.style.left = pos.left + "%";
+    rider.style.bottom = pos.bottom + "px";
+
+    rider.innerHTML = `
+      <span class="shirt">${jerseyForStars(stars)}</span>
+      <span class="bike">🚴</span>
+      <span class="name">${barn} · ⭐ ${stars}</span>
+    `;
+  });
+}
+
+function resumeTimers() {
+  børn.forEach(barn => {
+    const kid = data.kids[barn];
+
+    if (
+      kid.eveningStart &&
+      !kid.eveningFinished &&
+      !kid.eveningFailed
+    ) {
+      if (remainingMs(barn) <= 0) {
+        kid.eveningFailed = true;
+        gemData();
+      } else {
+        startTimerInterval(barn);
+      }
+    }
+  });
+}
+
+resumeTimers();
 bygTabel();
 
 </script>
