@@ -3,60 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f4f7fb">
 
-  <title>Min ToDo Liste</title>
+  <title>Familie ToDo</title>
 
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f2f2f7;
-      margin: 0;
-      padding: 25px;
+    * {
+      box-sizing: border-box;
     }
 
-    h1 {
-      margin-top: 40px;
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f7fb;
+      color: #1f2937;
     }
 
     .app {
-      max-width: 500px;
-      margin: auto;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
     }
 
-    input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 16px;
-      font-size: 18px;
+    h1 {
+      text-align: center;
+      margin: 10px 0 6px;
+      font-size: 34px;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #6b7280;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .menu button {
       border: none;
-      border-radius: 12px;
-      margin-bottom: 10px;
-    }
-
-    button {
-      width: 100%;
-      padding: 16px;
-      font-size: 18px;
-      border: none;
-      border-radius: 12px;
-      background: #007aff;
-      color: white;
-      font-weight: bold;
-    }
-
-    ul {
-      padding: 0;
-    }
-
-    li {
-      list-style: none;
+      border-radius: 18px;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: 700;
+      cursor: pointer;
       background: white;
-      padding: 16px;
-      margin-top: 10px;
-      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    .menu button.active {
+      outline: 4px solid #111827;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 28px;
+      margin: 10px 0 18px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 18px;
+      background: white;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e5e7eb;
+      border-right: 1px solid #e5e7eb;
+      text-align: center;
+      padding: 14px 10px;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: none;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    th {
+      background: #eef2f7;
       font-size: 18px;
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: left;
+      min-width: 250px;
+    }
+
+    td:first-child {
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    .check {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      border: 2px solid #d1d5db;
+      background: #f9fafb;
+      font-size: 30px;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.2s ease;
+    }
+
+    .check:active {
+      transform: scale(0.94);
+    }
+
+    .check.done {
+      background: #dcfce7;
+      border-color: #86efac;
+    }
+
+    .progress {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .reset {
+      display: block;
+      margin: 18px auto 0;
+      border: none;
+      background: #e5e7eb;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 700px) {
+      .app {
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .menu button {
+        font-size: 20px;
+        padding: 16px 10px;
+      }
+
+      .section-title {
+        font-size: 24px;
+      }
     }
   </style>
 </head>
@@ -65,37 +177,183 @@
 
 <div class="app">
 
-  <h1>Min ToDo Liste</h1>
-  <p>Hvad skal jeg huske?</p>
+  <h1>🏡 Familie ToDo</h1>
+  <div class="subtitle">Klar til dagen — og klar til natten</div>
 
-  <input id="opgave" placeholder="Skriv en opgave...">
+  <div class="menu">
+    <button id="morgenBtn" class="active" onclick="visListe('morgen')">
+      🌅 Morgen
+    </button>
 
-  <button onclick="tilfoej()">Tilføj</button>
+    <button id="aftenBtn" onclick="visListe('aften')">
+      🌙 Aften
+    </button>
+  </div>
 
-  <ul id="liste"></ul>
+  <h2 id="sectionTitle" class="section-title">🌅 Morgen</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Opgave</th>
+          <th>Vester</th>
+          <th>Bertil</th>
+          <th>Arthur</th>
+          <th>Leonora</th>
+        </tr>
+      </thead>
+
+      <tbody id="todoBody"></tbody>
+    </table>
+  </div>
+
+  <div id="progress" class="progress"></div>
+
+  <button class="reset" onclick="nulstilAktuelListe()">
+    Nulstil denne liste
+  </button>
 
 </div>
 
 <script>
 
-function tilfoej() {
+const børn = ["Vester", "Bertil", "Arthur", "Leonora"];
 
-  const input = document.getElementById("opgave");
+const opgaver = {
+  morgen: [
+    "🥣 Spise morgenmad",
+    "🪥 Børste tænder",
+    "👕 Tage tøj på",
+    "🚽 Tisse af",
+    "💇 Børste hår",
+    "🧴 Tage solcreme på",
+    "🤗 Giv mor og far et kram"
+  ],
 
-  if (input.value.trim() === "") return;
+  aften: [
+    "🚽 Tisse af",
+    "🪥 Børste tænder",
+    "👕 Tage tøj af",
+    "🤗 Giv mor og far et kram"
+  ]
+};
 
-  const punkt = document.createElement("li");
+let aktuelListe = "morgen";
 
-  punkt.textContent = "☐ " + input.value;
+function hentData() {
+  const gemt = localStorage.getItem("familieTodo");
 
-  punkt.onclick = function() {
-    punkt.remove();
+  if (gemt) {
+    return JSON.parse(gemt);
+  }
+
+  return {
+    morgen: {},
+    aften: {}
   };
-
-  document.getElementById("liste").appendChild(punkt);
-
-  input.value = "";
 }
+
+let data = hentData();
+
+function gemData() {
+  localStorage.setItem("familieTodo", JSON.stringify(data));
+}
+
+function visListe(type) {
+  aktuelListe = type;
+
+  document.getElementById("morgenBtn").classList.toggle("active", type === "morgen");
+  document.getElementById("aftenBtn").classList.toggle("active", type === "aften");
+
+  document.getElementById("sectionTitle").textContent =
+    type === "morgen" ? "🌅 Morgen" : "🌙 Aften";
+
+  bygTabel();
+}
+
+function bygTabel() {
+  const tbody = document.getElementById("todoBody");
+  tbody.innerHTML = "";
+
+  opgaver[aktuelListe].forEach((opgave, opgaveIndex) => {
+
+    const række = document.createElement("tr");
+
+    const opgaveFelt = document.createElement("td");
+    opgaveFelt.textContent = opgave;
+    række.appendChild(opgaveFelt);
+
+    børn.forEach((barn) => {
+
+      const celle = document.createElement("td");
+
+      const knap = document.createElement("button");
+      knap.className = "check";
+
+      const nøgle = barn + "_" + opgaveIndex;
+      const erFærdig = data[aktuelListe][nøgle] === true;
+
+      knap.textContent = erFærdig ? "✅" : "⬜";
+      knap.classList.toggle("done", erFærdig);
+
+      knap.onclick = function() {
+
+        const nyStatus = !(data[aktuelListe][nøgle] === true);
+
+        data[aktuelListe][nøgle] = nyStatus;
+
+        gemData();
+        bygTabel();
+      };
+
+      celle.appendChild(knap);
+      række.appendChild(celle);
+    });
+
+    tbody.appendChild(række);
+  });
+
+  opdaterStatus();
+}
+
+function opdaterStatus() {
+
+  const total =
+    opgaver[aktuelListe].length * børn.length;
+
+  let færdige = 0;
+
+  børn.forEach((barn) => {
+    opgaver[aktuelListe].forEach((_, index) => {
+
+      const nøgle = barn + "_" + index;
+
+      if (data[aktuelListe][nøgle] === true) {
+        færdige++;
+      }
+
+    });
+  });
+
+  document.getElementById("progress").textContent =
+    færdige + " af " + total + " opgaver er klaret";
+}
+
+function nulstilAktuelListe() {
+
+  const bekræft = confirm(
+    "Vil du nulstille alle krydser på denne liste?"
+  );
+
+  if (!bekræft) return;
+
+  data[aktuelListe] = {};
+  gemData();
+  bygTabel();
+}
+
+bygTabel();
 
 </script>
 
