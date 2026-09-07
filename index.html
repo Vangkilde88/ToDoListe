@@ -502,6 +502,247 @@
         grid-template-columns: 1fr 1fr;
       }
     }
+  
+    .reset-day-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 18px 0 6px;
+    }
+
+    .reset-day-btn {
+      border: none;
+      border-radius: 16px;
+      padding: 13px 18px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      background: white;
+      color: #1f2937;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    .reset-day-btn:active {
+      transform: scale(.98);
+    }
+
+    .mountain-section {
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .mountain {
+      height: 560px;
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at 84% 11%, rgba(255,239,151,.95) 0 34px, transparent 35px),
+        linear-gradient(180deg, #bfe4ff 0%, #e9f6ff 48%, #d8edc6 100%);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.6),
+        inset 0 -30px 60px rgba(50,100,60,.08);
+    }
+
+    .mountain::before {
+      content: "";
+      position: absolute;
+      left: -8%;
+      right: -8%;
+      bottom: 0;
+      height: 120px;
+      background:
+        radial-gradient(circle at 8% 100%, #98c97f 0 72px, transparent 74px),
+        radial-gradient(circle at 30% 100%, #8fbe78 0 90px, transparent 92px),
+        radial-gradient(circle at 55% 100%, #a6d08c 0 85px, transparent 87px),
+        radial-gradient(circle at 80% 100%, #8fbe78 0 100px, transparent 102px);
+      z-index: 1;
+    }
+
+    .mountain::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 64px;
+      transform: translateX(-50%);
+      width: 84%;
+      height: 390px;
+      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+      background:
+        linear-gradient(145deg, #8c99a6 0%, #6f7c89 44%, #586572 100%);
+      filter: drop-shadow(0 18px 22px rgba(48,63,79,.25));
+      z-index: 2;
+    }
+
+    .mountain-ridge {
+      position: absolute;
+      left: 50%;
+      bottom: 292px;
+      transform: translateX(-50%);
+      width: 225px;
+      height: 132px;
+      clip-path: polygon(50% 0%, 100% 100%, 70% 83%, 55% 100%, 42% 78%, 25% 96%, 0% 100%);
+      background: linear-gradient(180deg, #ffffff 0%, #e9f3fa 100%);
+      z-index: 3;
+      filter: drop-shadow(0 4px 3px rgba(0,0,0,.06));
+    }
+
+    .mountain-path {
+      position: absolute;
+      left: 50%;
+      bottom: 68px;
+      width: 16px;
+      height: 355px;
+      transform: translateX(-50%) rotate(2deg);
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,.95) 0 12px,
+          rgba(255,255,255,.2) 12px 22px
+        );
+      border-radius: 999px;
+      opacity: .85;
+      z-index: 4;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.14);
+    }
+
+    .sun {
+      top: 18px;
+      right: 28px;
+      font-size: 58px;
+      filter: drop-shadow(0 4px 8px rgba(255,186,0,.18));
+      z-index: 2;
+    }
+
+    .cloud {
+      opacity: .9;
+      filter: drop-shadow(0 3px 3px rgba(80,120,150,.08));
+      z-index: 2;
+    }
+
+    .cloud.c1 {
+      top: 52px;
+      left: 7%;
+    }
+
+    .cloud.c2 {
+      top: 120px;
+      right: 12%;
+    }
+
+    .peak,
+    .snow {
+      display: none;
+    }
+
+    .goal {
+      top: 14px;
+      background: rgba(255,255,255,.92);
+      padding: 8px 13px;
+      border-radius: 16px;
+      box-shadow: 0 5px 14px rgba(50,70,100,.14);
+      font-size: 14px;
+      z-index: 10;
+    }
+
+    .goal .big {
+      font-size: 31px;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .marker {
+      left: auto;
+      right: 16px;
+      z-index: 7;
+      background: rgba(255,255,255,.93);
+      border: 1px solid rgba(255,255,255,.8);
+      box-shadow: 0 5px 14px rgba(50,70,100,.12);
+      backdrop-filter: blur(4px);
+    }
+
+    .m5  { bottom: 136px; }
+    .m10 { bottom: 236px; }
+    .m20 { bottom: 354px; }
+
+    .rider {
+      z-index: 9;
+      min-width: 96px;
+    }
+
+    .rider .bike {
+      font-size: 35px;
+      filter: drop-shadow(0 3px 2px rgba(0,0,0,.18));
+    }
+
+    .rider .shirt {
+      font-size: 20px;
+    }
+
+    .rider .name {
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(255,255,255,.8);
+      box-shadow: 0 4px 10px rgba(40,55,80,.12);
+      padding: 4px 8px;
+    }
+
+    .trail-label {
+      position: absolute;
+      left: 14px;
+      bottom: 15px;
+      z-index: 8;
+      background: rgba(255,255,255,.86);
+      border-radius: 13px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #4b5563;
+    }
+
+    @media (max-width: 700px) {
+      .mountain {
+        height: 470px;
+      }
+
+      .mountain::after {
+        height: 320px;
+        width: 98%;
+        bottom: 58px;
+      }
+
+      .mountain-ridge {
+        bottom: 260px;
+        width: 175px;
+        height: 102px;
+      }
+
+      .mountain-path {
+        height: 290px;
+        bottom: 60px;
+      }
+
+      .m5  { bottom: 118px; }
+      .m10 { bottom: 197px; }
+      .m20 { bottom: 292px; }
+
+      .marker {
+        right: 8px;
+        font-size: 12px;
+        padding: 6px 9px;
+      }
+
+      .goal {
+        top: 10px;
+        font-size: 12px;
+      }
+
+      .goal .big {
+        font-size: 27px;
+      }
+
+      .rider .name {
+        font-size: 11px;
+      }
+    }
+
   </style>
 </head>
 
@@ -551,6 +792,12 @@
     </table>
   </div>
 
+  <div class="reset-day-wrap">
+    <button class="reset-day-btn" onclick="resetToday()">
+      🔄 Nulstil dagens opgaver
+    </button>
+  </div>
+
   <div class="mountain-section">
     <h2 class="mountain-title">🚴 Vejen mod toppen</h2>
     <div class="mountain-subtitle">
@@ -562,8 +809,8 @@
       <div class="cloud c1">☁️</div>
       <div class="cloud c2">☁️</div>
 
-      <div class="peak"></div>
-      <div class="snow"></div>
+      <div class="mountain-ridge"></div>
+      <div class="mountain-path"></div>
 
       <div class="goal">
         <span class="big">🌈🏆</span>
@@ -573,6 +820,8 @@
       <div class="marker m5">⚪🔴 5 ⭐</div>
       <div class="marker m10">🟢 10 ⭐</div>
       <div class="marker m20">🟡 20 ⭐</div>
+
+      <div class="trail-label">🏁 Start</div>
 
       <div id="rider-Vester" class="rider"></div>
       <div id="rider-Bertil" class="rider"></div>
@@ -1186,6 +1435,56 @@ async function markEveningFailed(barn) {
   }
 }
 
+
+async function resetToday() {
+  if (!requireFirebase()) return;
+
+  const okay = confirm(
+    "Nulstil alle dagens afkrydsninger og aften-timere?\n\n" +
+    "Stjernerne bliver IKKE slettet."
+  );
+
+  if (!okay) return;
+
+  try {
+    await firebaseFns.runTransaction(db, async transaction => {
+      const snap = await transaction.get(stateRef);
+
+      let next = resetForToday(
+        snap.exists() ? snap.data() : emptyData()
+      );
+
+      next.checks = {
+        morgen: {},
+        aften: {}
+      };
+
+      børn.forEach(barn => {
+        const stars = next.kids[barn].stars;
+
+        next.kids[barn] = {
+          ...defaultKidData(),
+          stars
+        };
+      });
+
+      next.date = todayKey();
+
+      transaction.set(stateRef, next);
+    });
+
+    børn.forEach(barn => {
+      clearInterval(timerIntervals[barn]);
+    });
+
+    alert("Dagens opgaver er nulstillet. Alle stjerner er bevaret ⭐");
+
+  } catch (error) {
+    console.error(error);
+    alert("Opgaverne kunne ikke nulstilles. Prøv igen.");
+  }
+}
+
 function showSuccess(barn, stars, type) {
   launchConfetti();
 
@@ -1381,7 +1680,8 @@ document
 
 Object.assign(window, {
   visListe,
-  checkPin
+  checkPin,
+  resetToday
 });
 
 startFirebase();
