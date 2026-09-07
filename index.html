@@ -743,7 +743,33 @@
       }
     }
 
-  </style>
+  
+    .rider {
+      width: 112px;
+      min-width: 112px;
+    }
+
+    .rider .name {
+      max-width: 112px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .rider {
+        width: 82px;
+        min-width: 82px;
+      }
+
+      .rider .name {
+        max-width: 82px;
+        padding: 4px 5px;
+        font-size: 10px;
+      }
+    }
+
+</style>
 </head>
 
 <body>
@@ -1569,20 +1595,13 @@ function riderPosition(stars, index) {
   const bottom =
     62 + progress * 385;
 
-  const spread =
-    120 * (1 - progress);
-
-  const offsets =
-    [-0.75, -0.25, 0.25, 0.75];
-
-  const xOffset =
-    spread * offsets[index];
-
-  const left =
-    50 + xOffset / 7;
+  // Hvert barn får sin egen "bane" op ad bjerget.
+  // Banerne bliver ved med at være adskilt, også når børnene
+  // har samme antal stjerner eller nærmer sig toppen.
+  const lanes = [30, 43, 57, 70];
 
   return {
-    left,
+    left: lanes[index],
     bottom
   };
 }
