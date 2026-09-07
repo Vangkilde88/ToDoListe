@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="da">
 <head>
@@ -614,6 +615,22 @@ const opgaver = {
 
 let aktuelListe = "morgen";
 let timerIntervals = {};
+let timerFailureWrites = new Set();
+let firebaseReady = false;
+let appUnlocked = false;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAmhOxG77FVLSaGqhP2uQAlnkc3a5tWVfc",
+  authDomain: "vangkildelommepenge.firebaseapp.com",
+  projectId: "vangkildelommepenge",
+  storageBucket: "vangkildelommepenge.firebasestorage.app",
+  messagingSenderId: "176791827841",
+  appId: "1:176791827841:web:5173c142f5858331fb2480"
+};
+
+let db;
+let stateRef;
+let firebaseFns = {};
 
 function todayKey() {
   return new Date().toISOString().slice(0,10);
@@ -630,17 +647,11 @@ function defaultKidData() {
   };
 }
 
-function hentData() {
-  const saved = localStorage.getItem("familieTodoV3");
-
-  if (saved) {
-    return JSON.parse(saved);
-  }
-
+function emptyData() {
   const kids = {};
 
-  børn.forEach(b => {
-    kids[b] = defaultKidData();
+  børn.forEach(barn => {
+    kids[barn] = defaultKidData();
   });
 
   return {
@@ -653,68 +664,191 @@ function hentData() {
   };
 }
 
-let data = hentData();
+function hentLokalData() {
+  try {
+    const saved = localStorage.getItem("familieTodoV3");
+    if (saved) return JSON.parse(saved);
+  } catch (error) {
+    console.warn("Kunne ikke læse gammel lokal data:", error);
+  }
 
-function sikreDataStruktur() {
+  return emptyData();
+}
 
-  if (!data.kids) {
-    data.kids = {};
+function normaliserData(input) {
+  const result = emptyData();
+  const source = input && typeof input === "object" ? input : {};
+
+  if (typeof source.date === "string") {
+    result.date = source.date;
+  }
+
+  if (source.checks && typeof source.checks === "object") {
+    result.checks.morgen =
+      source.checks.morgen && typeof source.checks.morgen === "object"
+        ? { ...source.checks.morgen }
+        : {};
+
+    result.checks.aften =
+      source.checks.aften && typeof source.checks.aften === "object"
+        ? { ...source.checks.aften }
+        : {};
   }
 
   børn.forEach(barn => {
+    const sourceKid =
+      source.kids &&
+      source.kids[barn] &&
+      typeof source.kids[barn] === "object"
+        ? source.kids[barn]
+        : {};
 
-    if (!data.kids[barn]) {
-      data.kids[barn] = defaultKidData();
-    }
-
-    if (data.kids[barn].lastMorningRewardDate === undefined) {
-      data.kids[barn].lastMorningRewardDate = null;
-    }
-
-    if (data.kids[barn].lastEveningRewardDate === undefined) {
-      data.kids[barn].lastEveningRewardDate = null;
-    }
-
+    result.kids[barn] = {
+      stars:
+        typeof sourceKid.stars === "number"
+          ? sourceKid.stars
+          : 0,
+      lastMorningRewardDate:
+        sourceKid.lastMorningRewardDate ?? null,
+      lastEveningRewardDate:
+        sourceKid.lastEveningRewardDate ?? null,
+      eveningStart:
+        typeof sourceKid.eveningStart === "number"
+          ? sourceKid.eveningStart
+          : null,
+      eveningFinished:
+        sourceKid.eveningFinished === true,
+      eveningFailed:
+        sourceKid.eveningFailed === true
+    };
   });
 
-  if (!data.checks) {
-    data.checks = {
-      morgen: {},
-      aften: {}
-    };
-  }
+  return result;
 }
 
-sikreDataStruktur();
-
-function gemData() {
-  localStorage.setItem("familieTodoV3", JSON.stringify(data));
-}
-
-function dagsNulstilling() {
-
+function resetForToday(source) {
+  const current = normaliserData(source);
   const idag = todayKey();
 
-  if (data.date !== idag) {
+  if (current.date === idag) {
+    return current;
+  }
 
-    data.date = idag;
+  current.date = idag;
+  current.checks = {
+    morgen: {},
+    aften: {}
+  };
 
-    data.checks = {
-      morgen: {},
-      aften: {}
-    };
+  børn.forEach(barn => {
+    current.kids[barn].eveningStart = null;
+    current.kids[barn].eveningFinished = false;
+    current.kids[barn].eveningFailed = false;
+  });
 
-    børn.forEach(barn => {
-      data.kids[barn].eveningStart = null;
-      data.kids[barn].eveningFinished = false;
-      data.kids[barn].eveningFailed = false;
-    });
+  return current;
+}
 
-    gemData();
+let data = resetForToday(hentLokalData());
+
+function gemLokalBackup() {
+  try {
+    localStorage.setItem("familieTodoV3", JSON.stringify(data));
+  } catch (error) {
+    console.warn("Kunne ikke gemme lokal backup:", error);
   }
 }
 
-dagsNulstilling();
+async function startFirebase() {
+  try {
+    const [
+      appModule,
+      authModule,
+      firestoreModule
+    ] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js"),
+      import("https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js")
+    ]);
+
+    const app = appModule.initializeApp(firebaseConfig);
+    const auth = authModule.getAuth(app);
+    db = firestoreModule.getFirestore(app);
+
+    firebaseFns = {
+      doc: firestoreModule.doc,
+      onSnapshot: firestoreModule.onSnapshot,
+      runTransaction: firestoreModule.runTransaction
+    };
+
+    await authModule.signInAnonymously(auth);
+
+    // ToDo-appen bruger sit eget dokument og blander sig ikke med lommepenge-appen.
+    stateRef = firebaseFns.doc(db, "todo", "state");
+
+    // Første gang: brug den eksisterende lokale ToDo-data som udgangspunkt.
+    await firebaseFns.runTransaction(db, async transaction => {
+      const snap = await transaction.get(stateRef);
+
+      if (!snap.exists()) {
+        transaction.set(stateRef, resetForToday(data));
+      } else {
+        const remote = normaliserData(snap.data());
+
+        if (remote.date !== todayKey()) {
+          transaction.set(stateRef, resetForToday(remote));
+        }
+      }
+    });
+
+    firebaseReady = true;
+
+    firebaseFns.onSnapshot(
+      stateRef,
+      snap => {
+        if (!snap.exists()) return;
+
+        data = resetForToday(snap.data());
+        gemLokalBackup();
+
+        if (appUnlocked) {
+          bygTabel();
+          updateMountain();
+          resumeTimers();
+        }
+      },
+      showFirebaseError
+    );
+
+  } catch (error) {
+    showFirebaseError(error);
+  }
+}
+
+function showFirebaseError(error) {
+  console.error("Firebase-fejl:", error);
+
+  if (!document.getElementById("firebaseError")) {
+    const box = document.createElement("div");
+    box.id = "firebaseError";
+    box.style.cssText =
+      "position:fixed;left:12px;right:12px;bottom:12px;z-index:30000;" +
+      "background:#fff0f0;color:#a32632;border:2px solid #e7a0a6;" +
+      "border-radius:16px;padding:12px;text-align:center;font-weight:800;";
+
+    box.textContent =
+      "Kunne ikke forbinde til den fælles ToDo-konto. Tjek internetforbindelsen og prøv igen.";
+
+    document.body.appendChild(box);
+  }
+}
+
+function requireFirebase() {
+  if (firebaseReady) return true;
+
+  alert("Den fælles konto er ved at forbinde. Prøv igen om et øjeblik 😊");
+  return false;
+}
 
 function jerseyForStars(stars) {
   if (stars >= 30) return "🌈";
@@ -725,7 +859,6 @@ function jerseyForStars(stars) {
 }
 
 function visListe(type) {
-
   aktuelListe = type;
 
   document.getElementById("morgenBtn")
@@ -741,7 +874,6 @@ function visListe(type) {
 }
 
 function bygHeader() {
-
   const head = document.getElementById("tableHead");
   head.innerHTML = "";
 
@@ -752,7 +884,6 @@ function bygHeader() {
   row.appendChild(first);
 
   børn.forEach(barn => {
-
     const th = document.createElement("th");
 
     const wrap = document.createElement("div");
@@ -774,7 +905,6 @@ function bygHeader() {
     wrap.appendChild(stars);
 
     if (aktuelListe === "aften") {
-
       const timer = document.createElement("div");
       timer.id = "timer-" + barn;
       timer.className = "timer";
@@ -806,14 +936,12 @@ function bygHeader() {
 }
 
 function bygTabel() {
-
   bygHeader();
 
   const tbody = document.getElementById("todoBody");
   tbody.innerHTML = "";
 
   opgaver[aktuelListe].forEach((opgave, index) => {
-
     const row = document.createElement("tr");
 
     const taskCell = document.createElement("td");
@@ -821,36 +949,20 @@ function bygTabel() {
     row.appendChild(taskCell);
 
     børn.forEach(barn => {
-
       const cell = document.createElement("td");
 
       const btn = document.createElement("button");
       btn.className = "check";
 
       const key = barn + "_" + index;
-
       const done =
         data.checks[aktuelListe][key] === true;
 
       btn.textContent = done ? "✅" : "⬜";
       btn.classList.toggle("done", done);
 
-      btn.onclick = function() {
-
-        data.checks[aktuelListe][key] = !done;
-
-        gemData();
-
-        if (aktuelListe === "morgen") {
-          checkMorningCompletion(barn);
-        }
-
-        if (aktuelListe === "aften") {
-          checkEveningCompletion(barn);
-        }
-
-        bygTabel();
-      };
+      btn.onclick = () =>
+        toggleTask(aktuelListe, barn, index);
 
       cell.appendChild(btn);
       row.appendChild(cell);
@@ -862,61 +974,112 @@ function bygTabel() {
   updateMountain();
 }
 
-function allMorningDone(barn) {
-
-  return opgaver.morgen.every((_, index) => {
-    return data.checks.morgen[barn + "_" + index] === true;
+function allDoneFor(source, type, barn) {
+  return opgaver[type].every((_, index) => {
+    return source.checks[type][barn + "_" + index] === true;
   });
 }
 
-function allEveningDone(barn) {
+async function toggleTask(type, barn, index) {
+  if (!requireFirebase()) return;
 
-  return opgaver.aften.every((_, index) => {
-    return data.checks.aften[barn + "_" + index] === true;
-  });
-}
+  let rewardType = null;
+  let rewardStars = null;
 
-function checkMorningCompletion(barn) {
+  try {
+    await firebaseFns.runTransaction(db, async transaction => {
+      const snap = await transaction.get(stateRef);
 
-  if (!allMorningDone(barn)) return;
+      let next = resetForToday(
+        snap.exists() ? snap.data() : emptyData()
+      );
 
-  const kid = data.kids[barn];
+      const key = barn + "_" + index;
+      const current =
+        next.checks[type][key] === true;
 
-  if (
-    kid.lastMorningRewardDate === todayKey()
-  ) {
-    return;
+      next.checks[type][key] = !current;
+
+      const kid = next.kids[barn];
+
+      if (
+        type === "morgen" &&
+        allDoneFor(next, "morgen", barn) &&
+        kid.lastMorningRewardDate !== todayKey()
+      ) {
+        kid.lastMorningRewardDate = todayKey();
+        kid.stars += 1;
+
+        rewardType = "morgen";
+        rewardStars = kid.stars;
+      }
+
+      if (
+        type === "aften" &&
+        allDoneFor(next, "aften", barn) &&
+        kid.eveningStart &&
+        !kid.eveningFinished &&
+        kid.lastEveningRewardDate !== todayKey()
+      ) {
+        const remaining =
+          10 * 60 * 1000 - (Date.now() - kid.eveningStart);
+
+        if (remaining > 0) {
+          kid.eveningFinished = true;
+          kid.lastEveningRewardDate = todayKey();
+          kid.stars += 1;
+
+          rewardType = "aften";
+          rewardStars = kid.stars;
+        } else {
+          kid.eveningFailed = true;
+        }
+      }
+
+      transaction.set(stateRef, next);
+    });
+
+    if (rewardType) {
+      showSuccess(barn, rewardStars, rewardType);
+    }
+
+  } catch (error) {
+    console.error(error);
+    alert("Ændringen kunne ikke gemmes. Prøv igen.");
   }
-
-  kid.lastMorningRewardDate = todayKey();
-  kid.stars += 1;
-
-  gemData();
-
-  showSuccess(
-    barn,
-    kid.stars,
-    "morgen"
-  );
-
-  updateMountain();
 }
 
-function startTimer(barn) {
+async function startTimer(barn) {
+  if (!requireFirebase()) return;
 
-  if (data.kids[barn].eveningStart) return;
+  try {
+    await firebaseFns.runTransaction(db, async transaction => {
+      const snap = await transaction.get(stateRef);
 
-  data.kids[barn].eveningStart = Date.now();
-  data.kids[barn].eveningFailed = false;
+      let next = resetForToday(
+        snap.exists() ? snap.data() : emptyData()
+      );
 
-  gemData();
+      const kid = next.kids[barn];
 
-  startTimerInterval(barn);
-  bygTabel();
+      if (kid.eveningStart || kid.eveningFinished) {
+        return;
+      }
+
+      kid.eveningStart = Date.now();
+      kid.eveningFailed = false;
+      kid.eveningFinished = false;
+
+      transaction.set(stateRef, next);
+    });
+
+  } catch (error) {
+    console.error(error);
+    alert("Timeren kunne ikke startes. Prøv igen.");
+  }
 }
 
 function startTimerInterval(barn) {
-
   clearInterval(timerIntervals[barn]);
 
   timerIntervals[barn] = setInterval(() => {
@@ -925,7 +1088,6 @@ function startTimerInterval(barn) {
 }
 
 function remainingMs(barn) {
-
   const start = data.kids[barn].eveningStart;
 
   if (!start) {
@@ -936,7 +1098,6 @@ function remainingMs(barn) {
 }
 
 function timerText(barn) {
-
   const kid = data.kids[barn];
 
   if (kid.eveningFinished) {
@@ -951,26 +1112,15 @@ function timerText(barn) {
     return "10:00";
   }
 
-  const ms = Math.max(
-    0,
-    remainingMs(barn)
-  );
+  const ms = Math.max(0, remainingMs(barn));
+  const totalSeconds = Math.floor(ms / 1000);
+  const min = Math.floor(totalSeconds / 60);
+  const sec = totalSeconds % 60;
 
-  const totalSeconds =
-    Math.floor(ms / 1000);
-
-  const min =
-    Math.floor(totalSeconds / 60);
-
-  const sec =
-    totalSeconds % 60;
-
-  return min + ":" +
-    String(sec).padStart(2, "0");
+  return min + ":" + String(sec).padStart(2, "0");
 }
 
 function updateTimerDisplay(barn) {
-
   const el =
     document.getElementById("timer-" + barn);
 
@@ -979,87 +1129,64 @@ function updateTimerDisplay(barn) {
   const kid = data.kids[barn];
 
   if (kid.eveningFinished) {
-
     el.textContent = "✅ Klaret";
     el.className = "timer success";
-
     clearInterval(timerIntervals[barn]);
-
     return;
   }
 
-  const remaining =
-    remainingMs(barn);
-
-  if (remaining <= 0) {
-
-    kid.eveningFailed = true;
-
-    gemData();
-
+  if (kid.eveningFailed) {
     el.textContent = "⏱️ Tiden gik";
     el.className = "timer failed";
-
     clearInterval(timerIntervals[barn]);
-
     return;
   }
 
-  el.textContent =
-    timerText(barn);
+  const remaining = remainingMs(barn);
 
-  el.className =
-    "timer running";
+  if (remaining <= 0) {
+    el.textContent = "⏱️ Tiden gik";
+    el.className = "timer failed";
+    clearInterval(timerIntervals[barn]);
+    markEveningFailed(barn);
+    return;
+  }
+
+  el.textContent = timerText(barn);
+  el.className = "timer running";
 }
 
-function checkEveningCompletion(barn) {
+async function markEveningFailed(barn) {
+  if (!firebaseReady) return;
+  if (timerFailureWrites.has(barn)) return;
 
-  if (!allEveningDone(barn)) return;
+  timerFailureWrites.add(barn);
 
-  const kid =
-    data.kids[barn];
+  try {
+    await firebaseFns.runTransaction(db, async transaction => {
+      const snap = await transaction.get(stateRef);
+      if (!snap.exists()) return;
 
-  if (!kid.eveningStart) return;
+      let next = resetForToday(snap.data());
+      const kid = next.kids[barn];
 
-  if (kid.eveningFinished) return;
-
-  if (
-    kid.lastEveningRewardDate === todayKey()
-  ) {
-    return;
-  }
-
-  const remaining =
-    remainingMs(barn);
-
-  if (remaining > 0) {
-
-    kid.eveningFinished = true;
-    kid.lastEveningRewardDate = todayKey();
-    kid.stars += 1;
-
-    clearInterval(timerIntervals[barn]);
-
-    gemData();
-
-    showSuccess(
-      barn,
-      kid.stars,
-      "aften"
-    );
-
-    updateMountain();
-
-  } else {
-
-    kid.eveningFailed = true;
-
-    gemData();
+      if (
+        kid.eveningStart &&
+        !kid.eveningFinished &&
+        10 * 60 * 1000 - (Date.now() - kid.eveningStart) <= 0
+      ) {
+        kid.eveningFailed = true;
+        transaction.set(stateRef, next);
+      }
+    });
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setTimeout(() => timerFailureWrites.delete(barn), 3000);
   }
 }
 
 function showSuccess(barn, stars, type) {
-
   launchConfetti();
 
   const popup =
@@ -1069,7 +1196,6 @@ function showSuccess(barn, stars, type) {
     "success-popup";
 
   if (type === "morgen") {
-
     popup.innerHTML = `
       <div class="emoji">🌅🚴⭐</div>
       <h2>${barn} er klar!</h2>
@@ -1077,9 +1203,7 @@ function showSuccess(barn, stars, type) {
       <p><strong>⭐ +1 stjerne</strong></p>
       <p>${jerseyForStars(stars)} ${stars} stjerner i alt</p>
     `;
-
   } else {
-
     popup.innerHTML = `
       <div class="emoji">🚴💨⭐</div>
       <h2>${barn} klarede det!</h2>
@@ -1097,7 +1221,6 @@ function showSuccess(barn, stars, type) {
 }
 
 function launchConfetti() {
-
   const emojis = [
     "🎉",
     "⭐",
@@ -1107,7 +1230,6 @@ function launchConfetti() {
   ];
 
   for (let i = 0; i < 55; i++) {
-
     const el =
       document.createElement("div");
 
@@ -1139,7 +1261,6 @@ function launchConfetti() {
 }
 
 function riderPosition(stars, index) {
-
   const capped =
     Math.min(stars, 30);
 
@@ -1168,9 +1289,7 @@ function riderPosition(stars, index) {
 }
 
 function updateMountain() {
-
   børn.forEach((barn, index) => {
-
     const stars =
       data.kids[barn].stars;
 
@@ -1178,6 +1297,8 @@ function updateMountain() {
       document.getElementById(
         "rider-" + barn
       );
+
+    if (!rider) return;
 
     const pos =
       riderPosition(
@@ -1200,8 +1321,8 @@ function updateMountain() {
 }
 
 function resumeTimers() {
-
   børn.forEach(barn => {
+    clearInterval(timerIntervals[barn]);
 
     const kid =
       data.kids[barn];
@@ -1211,15 +1332,9 @@ function resumeTimers() {
       !kid.eveningFinished &&
       !kid.eveningFailed
     ) {
-
       if (remainingMs(barn) <= 0) {
-
-        kid.eveningFailed = true;
-
-        gemData();
-
+        markEveningFailed(barn);
       } else {
-
         startTimerInterval(barn);
       }
     }
@@ -1227,11 +1342,11 @@ function resumeTimers() {
 }
 
 function checkPin() {
-
   const pin =
     document.getElementById("pinInput").value;
 
   if (pin === "0605") {
+    appUnlocked = true;
 
     document.getElementById(
       "lockScreen"
@@ -1243,9 +1358,9 @@ function checkPin() {
 
     bygTabel();
     updateMountain();
+    resumeTimers();
 
   } else {
-
     document.getElementById(
       "pinError"
     ).textContent = "Forkert kode";
@@ -1259,13 +1374,17 @@ function checkPin() {
 document
   .getElementById("pinInput")
   .addEventListener("keydown", function(event) {
-
     if (event.key === "Enter") {
       checkPin();
     }
   });
 
-resumeTimers();
+Object.assign(window, {
+  visListe,
+  checkPin
+});
+
+startFirebase();
 
 </script>
 
