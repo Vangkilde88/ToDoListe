@@ -1,13 +1,33 @@
-import {ITEMS} from './game.mjs';
 export const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function world(k){
  const p=k.purchases,has=id=>!!p[id],color=/^#[0-9a-f]{6}$/i.test(k.club.primary)?k.club.primary:'#285bdf',secondary=/^#[0-9a-f]{6}$/i.test(k.club.secondary)?k.club.secondary:'#f6ce60';
  const box=(x,y,w,h,label,c=color)=>`<g transform="translate(${x} ${y})"><path d="M0 0h${w}v${h}H0Z" fill="${c}"/><path d="M0 0l12 -12h${w}l-12 12Z" fill="${secondary}"/><path d="M${w} 0l12 -12v${h}l-12 12Z" fill="#173b3f"/><rect x="9" y="10" width="${Math.max(12,w-18)}" height="8" fill="#e6f8ff" opacity=".8"/><text x="${w/2}" y="${h-6}" text-anchor="middle" fill="white" font-size="9" font-weight="800">${label}</text></g>`;
- let scene=`<svg viewBox="0 0 900 580" role="img" aria-label="${escapeHTML(k.club.name)} med ${Object.keys(p).length} købte forbedringer" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#d6ebea"/><stop offset="1" stop-color="#eff2d6"/></linearGradient><pattern id="grass" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="25" height="50" fill="#6caf75"/><rect x="25" width="25" height="50" fill="#64a66e"/></pattern><filter id="shadow"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-opacity=".12"/></filter></defs><rect width="900" height="580" fill="url(#sky)"/><circle cx="770" cy="75" r="36" fill="#fff4c0"/><path d="M0 160Q130 80 270 160T540 150T900 130V580H0" fill="#c0d8b9"/><path d="M-80 350L470 70 980 380 430 670Z" fill="#a2bf9d"/><path d="M50 345L475 135 850 345 430 555Z" fill="#4c8066"/><path d="M50 330L475 120 850 330 430 540Z" fill="#aed18e" filter="url(#shadow)"/><path d="M115 340L482 159 799 340 432 517Z" fill="none" stroke="#e4dab4" stroke-width="24"/><g transform="translate(215 268) matrix(.86 -.43 .86 .43 0 0)"><rect x="-8" y="-8" width="326" height="226" rx="6" fill="#538761"/><rect width="310" height="210" fill="url(#grass)"/><g stroke="#d7ecc4" fill="none" stroke-width="2"><rect x="8" y="8" width="294" height="194"/><path d="M155 8v194M8 55h52v100H8M302 55h-52v100h52"/><circle cx="155" cy="105" r="30"/></g></g>`;
- // Old goals are present from day one; nets and flags alter the actual pitch.
- for(const [x,y] of [[230,302],[492,170]])scene+=`<g transform="translate(${x} ${y})"><path d="M0 30V0l38 19v30M0 0l-12 7v30l12 -7M38 19l-12 7v30" stroke="${has('net')?'#fff':'#8b7e67'}" stroke-width="4" fill="none"/>${has('net')?'<path d="M0 8l38 19M0 16l38 19M0 24l38 19M8 4v30M18 9v30M28 14v30" stroke="#fff" opacity=".8"/>':''}</g>`;
- scene+='<text x="430" y="291" font-size="15">⚽</text>';
- if(has('flags'))for(const [x,y] of [[211,269],[478,135],[661,228],[394,362]])scene+=`<path d="M${x} ${y}v-23" stroke="#fff" stroke-width="2"/><path d="M${x} ${y-23}l16 5-16 6" fill="${color}"/>`;
+ let scene=`<svg viewBox="0 0 900 580" role="img" aria-label="${escapeHTML(k.club.name)} med ${Object.keys(p).length} købte forbedringer" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#d6ebea"/><stop offset="1" stop-color="#eff2d6"/></linearGradient><pattern id="grass" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="25" height="50" fill="#6caf75"/><rect x="25" width="25" height="50" fill="#64a66e"/></pattern></defs><rect width="900" height="580" fill="url(#sky)"/><circle cx="770" cy="75" r="36" fill="#fff4c0"/><path d="M0 160Q130 80 270 160T540 150T900 130V580H0" fill="#c0d8b9"/><path d="M0 340Q220 205 450 255T900 300V580H0Z" fill="#a2bf9d"/><path d="M50 330L475 70 850 330 430 540Z" fill="#aed18e"/><path d="M115 300L482 95 799 300 432 477Z" fill="none" stroke="#e4dab4" stroke-width="18" stroke-linejoin="round"/><g transform="translate(215 268) matrix(.86 -.43 .86 .43 0 0)"><rect x="-5" y="-5" width="320" height="220" fill="#91bf7f"/><rect width="310" height="210" fill="url(#grass)"/><g stroke="#d7ecc4" fill="none" stroke-width="2"><rect x="8" y="8" width="294" height="194"/><path d="M155 8v194M8 55h52v100H8M302 55h-52v100h52"/><circle cx="155" cy="105" r="30"/></g></g>`;
+ // All pitch fixtures share the grass plane; goal posts rise vertically
+ // from projected touch points instead of using unrelated screen positions.
+ const project=(x,y)=>[215+.86*(x+y),268+.43*(y-x)];
+ const point=([x,y])=>`${x.toFixed(2)},${y.toFixed(2)}`;
+ for(const [x,depth] of [[8,-16],[302,16]]) {
+  const a=project(x,75),b=project(x,135),c=project(x+depth,75),d=project(x+depth,135);
+  const up=([x,y])=>[x,y-26];
+  const stroke=has('net')?'#f9fbef':'#9b8662';
+  scene+=`<g stroke-linejoin="round" stroke-linecap="round"><path d="M${point(a)}L${point(b)}L${point(d)}L${point(c)}Z" fill="#315842" opacity=".12"/>`;
+  if(has('net')) {
+   scene+=`<path d="M${point(up(a))}L${point(up(b))}L${point(up(d))}L${point(up(c))}Z M${point(up(c))}L${point(up(d))}L${point(d)}L${point(c)}Z" fill="#ffffff" fill-opacity=".12" stroke="#e4eedc" stroke-width="1"/>`;
+   for(let i=1;i<6;i++) {
+    const t=i/6,front=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],back=[c[0]+(d[0]-c[0])*t,c[1]+(d[1]-c[1])*t];
+    scene+=`<path d="M${point(up(front))}L${point(up(back))}L${point(back)}" fill="none" stroke="#e4eedc" stroke-width=".8"/>`;
+   }
+   for(const h of [9,18])scene+=`<path d="M${point([c[0],c[1]-h])}L${point([d[0],d[1]-h])}" stroke="#e4eedc" stroke-width=".8"/>`;
+  }
+  scene+=`<path d="M${point(c)}L${point(up(c))}L${point(up(a))} M${point(d)}L${point(up(d))}L${point(up(b))}" fill="none" stroke="${stroke}" stroke-width="2"/><path d="M${point(a)}L${point(up(a))}L${point(up(b))}L${point(b)}" fill="none" stroke="${stroke}" stroke-width="3.5"/></g>`;
+ }
+ const [ballX,ballY]=project(155,120);
+ scene+=`<ellipse cx="${ballX+2}" cy="${ballY+1}" rx="6" ry="3" fill="#315842" opacity=".22"/><g transform="translate(${ballX} ${ballY-5})"><circle r="5.5" fill="#fffdf1" stroke="#385349" stroke-width=".8"/><path d="M-2 -2L1 -3 3 0 1 2-2 1Z M-5 1l2 1 0 2 M1 -5l1 2 M4 3l-2 -1" fill="#30463e" stroke="#30463e" stroke-width=".7"/></g>`;
+ if(has('flags'))for(const corner of [[8,8],[302,8],[302,202],[8,202]]) {
+  const [x,y]=project(...corner);
+  scene+=`<path d="M${x} ${y}v-23" stroke="#fff" stroke-width="2"/><path d="M${x} ${y-23}l16 5-16 6" fill="${color}"/>`;
+ }
  if(has('fence'))scene+='<path d="M60 325L430 535 844 327" fill="none" stroke="#738c80" stroke-width="7" stroke-dasharray="3 7"/>';
  if(has('bench'))scene+=box(275,383,55,16,'BÆNK','#ad8460');
  if(has('score'))scene+=box(586,145,65,34,'0 : 0','#243e38');
