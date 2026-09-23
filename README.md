@@ -28,9 +28,17 @@ PIN er samme klientbaserede familiespærre som tidligere, ikke en ny sikkerhedsg
 
 ```sh
 python -m http.server 4173
-node --test tests/game.test.mjs
+node --test tests/*.test.mjs
 ```
 
 Åbn appen med `?demo=1` for isoleret lokal afprøvning. Demoen viser tydeligt DEMO, starter uden familiekode og importerer aldrig Firebase-SDK'et. Den bruger sin egen localStorage-nøgle og starter på nul stjerner. Den normale app bruger fortsat PIN og fælles Firebase.
 
 Enhedstest dækker migrationsfelter, grænsetider, langsom gennemførelse, børneisolation, dobbeltbelønning, nulstilling, dansk midnat, køb, afhængigheder, katalog og streak-præmier.
+
+## Fælles rutiner på iPad
+
+Forsiden har Morgen og Aften for alle tre børn. Hver rutine viser Arthur, Bertil og Vester i hver sin kolonne med egne startknapper, vedvarende timere, afkrydsninger og stjernekonti. Tre kolonner beholdes i både stående og liggende tablet-layout; små telefoner kan rulle vandret.
+
+Belønningen vises inde i den færdige drengs kolonne uden dialog eller konfetti over de andres opgaver. Individuelle klubber åbnes fra knappen nederst i hver kolonne. Gemmehandlinger køres i en kø, så hurtige tryk fra flere børn ikke tabes under en langsom cloud-transaktion. Afkrydsninger gemmer den ønskede værdi frem for at vende værdien igen ved et dobbelttryk.
+
+11 automatiske tests består, herunder samtidige opgaver, separate tidsbonusser og fortsat behandling efter fejl i køen. Visuel test på en rigtig iPad og mod live Firebase mangler fortsat; Vercel-forhåndsvisningen kræver adgang til teamet vangkilde.
