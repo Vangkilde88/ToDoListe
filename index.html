@@ -5,11 +5,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#153d32"><meta name="apple-mobile-web-app-title" content="VangkildeToDo">
 <title>VangkildeToDo · Min klub</title>
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.json"><link rel="stylesheet" href="/styles.css">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=football-1"><link rel="manifest" href="/manifest.json?v=football-1"><link rel="stylesheet" href="/styles.css">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=football-1">
 </head>
 <body>
-<div id="lockScreen" class="lock-screen"><form id="unlock" class="lock-box"><div class="badge">⚽</div><p class="eyebrow">VANGKILDE TODO</p><h1>Små opgaver.<br>Store klubdrømme.</h1><p>Forældreadgang · Brug jeres sædvanlige kode.</p><label for="pinInput">Familiekode</label><input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off" required><button class="primary">Åbn appen →</button><p id="pinError" role="alert"></p></form></div>
-<div id="mainApp" hidden><header class="topbar"><button class="brand" data-action="home">⚽ <span>VANGKILDE<span class="brand-small">TODO / FOOTBALL CLUB</span></span></button><span id="sync" role="status">Forbinder…</span><button class="icon-button" data-action="parent" aria-label="Forældreadgang">⚙</button></header><main id="view"></main><nav id="nav" aria-label="Hovedmenu"></nav></div>
+<div id="lockScreen" class="lock-screen"><form id="unlock" class="lock-box"><div class="badge"><img src="/icon-192.png?v=football-1" width="72" height="72" alt="VangkildeToDo klubskjold" style="border-radius:16px"></div><p class="eyebrow">VANGKILDE TODO</p><h1>Små opgaver.<br>Store klubdrømme.</h1><p>Forældreadgang · Brug jeres sædvanlige kode.</p><label for="pinInput">Familiekode</label><input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off" required><button class="primary">Åbn appen →</button><p id="pinError" role="alert"></p></form></div>
+<div id="mainApp" hidden><header class="topbar"><button class="brand" data-action="home"><img src="/icon-192.png?v=football-1" width="40" height="40" alt="" style="border-radius:9px"> <span>VANGKILDE<span class="brand-small">TODO / FOOTBALL CLUB</span></span></button><span id="sync" role="status">Forbinder…</span><button class="icon-button" data-action="parent" aria-label="Forældreadgang">⚙</button></header><main id="view"></main><nav id="nav" aria-label="Hovedmenu"></nav></div>
 <dialog id="dialog"><div id="dialogBody"></div><button class="primary" id="closeDialog">Videre →</button></dialog>
 <div id="notice" role="status" aria-live="polite"></div>
 <script type="module" src="/app.mjs"></script>
