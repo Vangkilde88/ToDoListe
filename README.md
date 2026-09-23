@@ -42,3 +42,9 @@ Forsiden har Morgen og Aften for alle tre børn. Hver rutine viser Arthur, Berti
 Belønningen vises inde i den færdige drengs kolonne uden dialog eller konfetti over de andres opgaver. Individuelle klubber åbnes fra knappen nederst i hver kolonne. Gemmehandlinger køres i en kø, så hurtige tryk fra flere børn ikke tabes under en langsom cloud-transaktion. Afkrydsninger gemmer den ønskede værdi frem for at vende værdien igen ved et dobbelttryk.
 
 11 automatiske tests består, herunder samtidige opgaver, separate tidsbonusser og fortsat behandling efter fejl i køen. Visuel test på en rigtig iPad og mod live Firebase mangler fortsat; Vercel-forhåndsvisningen kræver adgang til teamet vangkilde.
+
+## Tegnet klubverden
+
+Klubområdet bruger nu et fælles isometrisk koordinatsystem i `club-art.mjs`. Alle 48 opgraderinger har tegnede vektoraktiver; ingen emojis bruges som bygninger, spillere eller udstyr. Tribuner har individuelle sæder, trapper, rækværk og tagsektioner. Arenatrinene omslutter banen med endetribuner og hjørnetårne. Klubfarver bruges til sæder, tage, spillertrøjer og facadedetaljer. Forældede bygningstrin erstattes visuelt af deres efterfølgere.
+
+Butikkens illustrationer og købsdialogen bruger samme grafik som klubområdet. Grafikken ændrer ikke køb, priser, beholdninger eller lagring. 13 tests består, inklusive alle aktiv-ID'er og rendering af stadier. Tre visuelle stadier er renderkontrolleret fra SVG: tom bane, lokalstadion og fuldt anlæg. Se `docs/stadium-development.png`. iPad Safari er ikke særskilt browserkontrolleret.
