@@ -43,10 +43,8 @@ Belønningen vises inde i den færdige drengs kolonne uden dialog eller konfetti
 
 11 automatiske tests består, herunder samtidige opgaver, separate tidsbonusser og fortsat behandling efter fejl i køen. Visuel test på en rigtig iPad og mod live Firebase mangler fortsat; Vercel-forhåndsvisningen kræver adgang til teamet vangkilde.
 
-## Illustreret klubverden
+## Tegnet klubverden
 
-Alle 48 opgraderinger bruger detaljerede WebP-illustrationer i assets/club. world.mjs sammensætter det aktuelle anlæg efter faktiske køb; større bygninger erstatter deres forløbere. Klubben starter med en slidt græsbane og gamle mål. Når alle 48 forbedringer er købt, vises det godkendte endgame-panorama.
+Klubområdet bruger nu et fælles isometrisk koordinatsystem i `club-art.mjs`. Alle 48 opgraderinger har tegnede vektoraktiver; ingen emojis bruges som bygninger, spillere eller udstyr. Tribuner har individuelle sæder, trapper, rækværk og tagsektioner. Arenatrinene omslutter banen med endetribuner og hjørnetårne. Klubfarver bruges til sæder, tage, spillertrøjer og facadedetaljer. Forældede bygningstrin erstattes visuelt af deres efterfølgere.
 
-Illustrationerne bruger en fast smaragdgrøn, elfenbenshvid og gylden stil. Valgte klubfarver vises stadig i klubbens identitet og overskrift. Butik, købskvitteringer og milepæle bruger den samme billedstil. Zoomknapper og tryk på byggede forbedringer gør anlægget muligt at udforske.
-
-Priser, rutiner, køb, stjerner og Firebase-lagring er uændrede. 14 automatiske tests består, inklusive hele opgraderingsforløbet, billedfiler og børneisolation. iPad Safari er ikke særskilt browserkontrolleret.
+Butikkens illustrationer og købsdialogen bruger samme grafik som klubområdet. Grafikken ændrer ikke køb, priser, beholdninger eller lagring. 13 tests består, inklusive alle aktiv-ID'er og rendering af stadier. Tre visuelle stadier er renderkontrolleret fra SVG: tom bane, lokalstadion og fuldt anlæg. Se `docs/stadium-development.png`. iPad Safari er ikke særskilt browserkontrolleret.

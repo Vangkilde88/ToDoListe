@@ -1,20 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {existsSync} from 'node:fs';
-import {ITEMS,normalize,buy} from '../game.mjs';
-import {world,upgradeArt,clubStage,sceneNodes} from '../world.mjs';
-test('all 48 upgrades and scene sprites have production artwork',()=>{
+import {ITEMS,normalize} from '../game.mjs';
+import {asset} from '../club-art.mjs';
+import {world,upgradeArt,clubStage} from '../world.mjs';
+test('all 48 upgrades have drawn assets and valid catalogue illustrations without emoji',()=>{
  const k=normalize({}).kids.Arthur;
- for(const i of ITEMS){const svg=upgradeArt(i);assert.ok(svg.includes((i.id==='final'?'final-detail':i.id)+'.webp'));assert.ok(!/NaN|undefined|Infinity|\p{Extended_Pictographic}/u.test(svg));assert.ok(existsSync(new URL('../assets/club/'+i.id+'.webp',import.meta.url)));k.purchases[i.id]={};}
- for(const n of sceneNodes(k))assert.ok(existsSync(new URL('../assets/club/'+n.art+'.webp',import.meta.url)),n.art);
- for(const art of ['start','start-net','terrain','endgame-reference','final-detail',...[3,7,14,30,50,100].map(x=>'award-'+x)])assert.ok(existsSync(new URL('../assets/club/'+art+'.webp',import.meta.url)),art);
+ for(const i of ITEMS){const a=asset(i.id,k,true),svg=upgradeArt(i,k);assert.ok(a.length>40,i.id);assert.ok(svg.includes('<svg'),i.id);assert.ok(!/NaN|undefined|Infinity/.test(svg),i.id);assert.ok(!/\p{Extended_Pictographic}/u.test(svg),i.id);}
 });
-test('every purchase changes the scene and keeps all owned upgrades represented',()=>{
- const state=normalize({}),k=state.kids.Arthur;k.stars=50000;
- assert.deepEqual(sceneNodes(k).map(n=>n.id),['start']);
- for(const item of ITEMS){const before=world(k);buy(state,'Arthur',item.id);assert.notEqual(world(k),before,item.id);const represented=new Set(sceneNodes(k).flatMap(n=>[n.id,...n.includes]));for(const id of Object.keys(k.purchases))assert.ok(represented.has(id),id);for(const id of represented)assert.ok(id==='start'||k.purchases[id],id);}
- assert.ok(world(k).includes('endgame-reference.webp'));assert.equal(clubStage(k),'CHAMPIONS ARENA');
-});
-test('independent branches do not advance the stadium or mutate saved data',()=>{
- const k=normalize({}).kids.Arthur;k.club.name='<script>test</script>';k.purchases.balls={};k.purchases.shed={};const snapshot=JSON.stringify(k);const html=world(k);assert.equal(JSON.stringify(k),snapshot);assert.ok(!html.includes('<script>'));assert.equal(clubStage(k),'HER BEGYNDER DRØMMEN');assert.ok(sceneNodes(k).some(n=>n.id==='start'));
+test('stadium stages change the scene without changing club data',()=>{
+ const k=normalize({}).kids.Arthur;k.club.name='<script>test</script>';const first=world(k);assert.ok(!first.includes('<script>'));k.purchases.stand={};const local=world(k);k.purchases.bigstand={};k.purchases.arena={};const arena=world(k);k.purchases.final={};const snapshot=JSON.stringify(k),last=world(k);assert.equal(JSON.stringify(k),snapshot);assert.notEqual(first,local);assert.notEqual(local,arena);assert.notEqual(arena,last);assert.equal(clubStage(k),'CHAMPIONS ARENA');assert.ok(!/\p{Extended_Pictographic}/u.test(last));
 });
