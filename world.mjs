@@ -1,66 +1,85 @@
-import {ITEMS} from './game.mjs';
-import {esc,P,poly,line,plane,dot,label,block,building,person,ball,tree,goal,stand,trophy,star,pitch,asset,ASSET_POS} from './club-art.mjs';
-export const escapeHTML=esc;
-const safeColor=(v,f)=>/^#[0-9a-f]{6}$/i.test(v)?v:f;
-function palette(k){return {...k,club:{...k.club,primary:safeColor(k.club.primary,'#386da6'),secondary:safeColor(k.club.secondary,'#e5bc68')}};}
+import {ITEMS,ACHIEVEMENTS} from './game.mjs';
+
+export const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=escapeHTML;
+export const ART_ROOT='./assets/club/';
+const known=new Map(ITEMS.map(i=>[i.id,i]));
 export function clubStage(k){const p=k.purchases;return p.final?'CHAMPIONS ARENA':p.arena?'VANGKILDE ARENA':p.bigstand?'STOR STADIONKLUB':p.stand?'LOKALSTADION':'HER BEGYNDER DRØMMEN';}
-export function upgradeArt(item,k){k=palette(k);let art=asset(item.id,k,true);const [x,y]=P(0,0);const tall=item.id==='lights';
- if(['arena','final'].includes(item.id)){
-  const trim=item.id==='final'?'#e1bf65':k.club.secondary;
-  art=pitch(-90,-55,180,110,true)+stand(-105,-92,210,26,4,k.club.primary,trim,true,-1)+goal(-88,-15,true,-1,.65)+goal(88,-15,true,1,.65)+stand(-105,66,210,26,4,k.club.primary,trim,true,1);
-  art+=`<g transform="translate(1160 0) scale(-1 1)">${stand(-65,-135,130,26,4,k.club.primary,trim,true,-1)+stand(-65,110,130,26,4,k.club.primary,trim,true,1)}</g>`;
-  if(item.id==='final')for(let i=0;i<3;i++)art+=star(-28+i*28,-90,64,6,trim);
-  return `<svg class="upgrade-art" viewBox="${x-190} ${y-145} 380 250" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">${art}</svg>`;
+export function upgradeArt(item){
+ if(!known.has(item.id))return '';
+ return `<svg class="upgrade-art" viewBox="0 0 400 300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><image href="${ART_ROOT}${item.id==='final'?'final-detail':item.id}.webp" x="18" y="14" width="364" height="272" preserveAspectRatio="xMidYMid meet"/></svg>`;
+}
+export function awardArt(days){return ACHIEVEMENTS.some(a=>a.days===days)?`<img class="award-art" src="${ART_ROOT}award-${days}.webp" width="512" height="512" alt="" loading="lazy">`:'';}
+
+// Coordinates describe screen-space footprints in one fixed camera. Ownership,
+// not star totals or purchase count, determines every building and replacement.
+export function sceneNodes(k){
+ const p=k.purchases,has=id=>!!p[id],nodes=[];
+ const add=(id,x,y,w,h,art=id,includes=[])=>nodes.push({id,art,x,y,w,h,includes});
+ const arena=has('final')?'final':has('arena')?'arena':null;
+ if(arena){
+  add(arena,55,110,890,610,arena,['net','flags','bench','fence','stand','bigstand','roof','arena','lights'].filter(id=>id!==arena&&has(id)));
+ }else{
+  const stand=has('roof')?'roof':has('bigstand')?'bigstand':has('stand')?'stand':null;
+  if(stand)add(stand,310,115,395,235,stand,['stand','bigstand'].filter(id=>id!==stand&&has(id)));
+  add(has('net')?'net':'start',125,235,690,500,has('net')?'start-net':'start');
+  if(has('fence'))add('fence',102,223,745,520);
+  if(has('flags'))[[219,379],[395,289],[514,629],[706,511]].forEach(([x,y])=>add('flags',x,y,24,40,'corner-flag'));
+  if(has('bench')){add('bench',508,350,90,53,'dugout');add('bench',595,408,90,53,'dugout');}
  }
- return `<svg class="upgrade-art" viewBox="${x-100} ${y-(tall?145:110)} 280 ${tall?205:190}" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><ellipse cx="${x+25}" cy="${y+12}" rx="76" ry="22" fill="#bdcfc533"/>${art}</svg>`;}
-export function world(raw){
- const k=palette(raw),p=k.purchases,has=id=>!!p[id],c=k.club.primary,a=k.club.secondary;
- const grown=has('stand')||has('arena'),elite=has('arena')||has('final');
- let s=`<svg class="club-illustration" viewBox="-135 -150 1430 905" role="img" aria-label="${esc(k.club.name)}: ${clubStage(k).toLocaleLowerCase('da')}, ${Object.keys(p).length} byggede forbedringer" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="club-land" x2=".3" y2="1"><stop stop-color="#e9efe6"/><stop offset="1" stop-color="#bacfbb"/></linearGradient><radialGradient id="club-light"><stop stop-color="#fcf2bc" stop-opacity=".26"/><stop offset="1" stop-color="#fcf2bc" stop-opacity="0"/></radialGradient></defs><rect x="-135" y="-150" width="1430" height="905" fill="url(#club-land)"/>`;
- // Continuous parkland, roads and planting; no floating island or disconnected ground.
- s+=plane(-385,-315,930,805,0,'#adc49f')+plane(-340,-285,855,730,0,'#bdd1ae');
- s+=plane(-330,380,850,46,0,'#879592')+line([[-330,403,1],[520,403,1]],'#d4d9c5',1.4);
- s+=plane(-305,-278,28,665,0,'#d7d0b9')+plane(-305,206,800,28,0,'#d7d0b9')+plane(263,-278,22,680,0,'#d7d0b9');
- for(let i=0;i<11;i++){s+=tree(-330+i*79,-294,.65+(i%3)*.12);s+=tree(-352,(-220+i*57),.7);}
- for(let i=0;i<7;i++)s+=tree(515,-210+i*88,.8);
- s+=plane(-245,-224,505,414,0,grown?'#abbab3':'#acc59b');
- s+=pitch(-200,-125,400,250,grown);
- if(!grown){for(const [x,y] of [[-185,-106],[-142,80],[158,100],[170,-85]])s+=plane(x,y,12,6,.1,'#a4af792e');}
- const objects=[];
- const add=(depth,html)=>objects.push({depth,html});
- // The base goals are replaced by the net purchase, not duplicated.
- add(-210,goal(-198,-23,has('net'),-1));add(210,goal(198,-23,has('net'),1));add(10,ball(3,8));
- if(has('flags'))for(const [x,y] of [[-198,-123],[198,-123],[-198,123],[198,123]])add(x+y,line([[x,y,0],[x,y,25]],'#f4f1de',1.5)+poly([[x,y,25],[x+17,y,20],[x,y,16]],c));
- if(has('fence'))for(const y of [-212,194]){let f='';for(let x=-245;x<=250;x+=16)f+=line([[x,y,0],[x,y,20]],'#688d87',.8);f+=line([[-245,y,20],[250,y,20]],'#92aaa1',1.5);add(y+5,f);}
- if(has('lights'))for(const [x,y] of [[-240,-205],[246,-205],[-240,190],[246,190]]){
-  const [sx,sy]=P(x,y,140);add(x+y,`<g transform="translate(${P(x,y)[0]-P(...ASSET_POS.lights)[0]} ${P(x,y)[1]-P(...ASSET_POS.lights)[1]})">${asset('lights',k)}</g>`);
-  s+=`<ellipse cx="${sx}" cy="${sy+78}" rx="90" ry="55" fill="url(#club-light)"/>`;
+ if(has('lights')&&!arena)[[175,238],[745,351],[260,555],[735,580]].forEach(([x,y])=>add('lights',x,y,40,160,'floodlight'));
+ if(has('score'))add('score',110,170,115,100);
+ if(has('vip'))add('vip',715,125,205,150);
+
+ // Independent training branch. Its top buildings absorb only their own
+ // structural predecessors; optional equipment stays visible at every tier.
+ if(has('campus'))add('campus',1070,55,410,250,'campus',['elite','gym','hall'].filter(has));
+ else{
+  if(has('hall'))add('hall',945,75,255,160);
+  if(has('elite'))add('elite',1210,70,255,200,'elite',['gym'].filter(has));
+  else if(has('gym'))add('gym',1230,110,220,150);
  }
- // Stand upgrades replace their predecessor so the stadium genuinely grows.
- if(has('final'))add(-200,asset('final',k));else if(has('roof'))add(-200,asset('roof',k));else if(has('stand'))add(-200,asset('stand',k));
- if(has('bigstand'))add(205,asset('bigstand',k));
- if(elite){
-  // Enclose the bowl with end stands, corner towers and an illuminated fascia.
-  add(120,`<g transform="translate(1160 0) scale(-1 1)">${stand(-144,-260,287,44,6,c,has('final')?'#deb95f':a,true,-1)}</g>`);
-  add(370,`<g transform="translate(1160 0) scale(-1 1)">${stand(-144,216,287,44,6,c,has('final')?'#deb95f':a,true,1)}</g>`);
-  for(const [x,y] of [[-262,-213],[216,-213],[-262,172],[216,172]])add(x+y,building(x,y,46,35,66,'#eef0e7',has('final')?'#e0bd63':a));
-  add(218,poly([[-214,205,0],[214,205,0],[214,205,13],[-214,205,13]],'#203d4a')+label(0,206,5,has('final')?'CHAMPIONS ARENA':k.club.name.toUpperCase(),12,'#f4df9d'));
- }
- if(has('final'))for(let i=0;i<5;i++)add(-390,star(-70+i*34,-221,106,7,'#edc765'));
- const replacements=new Set(['net','flags','fence','lights','stand','bigstand','roof','arena','final']);
- if(has('palace')){replacements.add('house');replacements.add('center');}else if(has('center'))replacements.add('house');
- for(const item of ITEMS){if(!has(item.id)||replacements.has(item.id))continue;const [x,y]=ASSET_POS[item.id];add(x+y+20,`<g class="club-asset" data-upgrade="${item.id}"><title>${esc(item.name)}</title>${asset(item.id,k)}</g>`);}
- if(has('stand'))for(let i=0;i<(has('fans')?30:10);i++){const x=-180+i%15*25,y=-182+Math.floor(i/15)*8;add(-120,person(x,y,i%3?c:a,'#ba8b71',.65));}
- if(has('kit'))for(const [x,y] of [[-80,-65],[110,55],[-115,58],[135,-78]])add(x+y,person(x,y,c));
- if(k.achievements[3])add(268,trophy(-242,330));
- if(k.achievements[7])add(300,poly([[-240,345,3],[-205,345,3],[-205,345,20],[-240,345,20]],'#d3bb79')+label(-222,345,10,'SPONSOR',5,'#263f47'));
- if(k.achievements[14])add(320,line([[15,360,0],[15,360,62]],'#eaeede',2)+poly([[15,360,62],[43,360,55],[43,360,34],[15,360,42]],c));
- if(k.achievements[30])add(390,block(55,360,24,10,31,'#314955','#e4d19c')+poly([[60,371,25],[65,371,28],[69,371,26],[73,371,28],[78,371,25],[75,371,21],[74,371,10],[64,371,10],[63,371,21]],a));
- if(k.achievements[50])add(420,block(90,360,18,18,17,'#455e64','#d6c58c')+ball(99,369,24,true));
- if(k.achievements[100])add(450,block(135,355,23,23,19,'#5b7274','#c6c9b0')+`<g transform="translate(0 -18)">${person(147,367,'#b39c62','#b39c62',1.6)}</g>`);
- objects.sort((a,b)=>a.depth-b.depth);s+=objects.map(o=>o.html).join('');
- // Foreground planting frames the stadium without covering the pitch.
- for(let i=0;i<9;i++)s+=tree(-280+i*93,453,.8+(i%2)*.25);
- s+=`<g transform="translate(-70 675)"><rect width="320" height="48" rx="12" fill="#f3f6eccf"/><text x="18" y="21" font-family="Arial,sans-serif" font-weight="700" font-size="11" letter-spacing="2" fill="#2d5549">${clubStage(k)}</text><text x="18" y="37" font-family="Arial,sans-serif" font-size="10" fill="#6a8072">${Object.keys(p).length} af ${ITEMS.length} forbedringer bygget</text></g></svg>`;
- return s;
+ if(has('recovery'))add('recovery',1360,258,145,95);
+ if(has('lab'))add('lab',1015,235,160,105);
+ if(has('pitch'))add('pitch',1060,332,390,205);
+ const equipment=[['balls',1010,380,25,26],['cones',1080,391,60,32],['ladder',1195,437,64,35],['minigoal',1145,390,60,40],['wall',1328,408,64,52]];
+ for(const [id,x,y,w,h] of equipment)if(has(id))add(id,x,y,w,h);
+
+ const home=has('palace')?'palace':has('center')?'center':has('house')?'house':null;
+ if(home)add(home,1165,553,280,200,home,['house','center'].filter(id=>id!==home&&has(id)));
+ if(has('shed'))add('shed',1020,549,95,72);
+ if(has('showers'))add('showers',1020,629,132,90,'showers',['changing'].filter(has));
+ else if(has('changing'))add('changing',1020,629,120,82);
+ if(has('museum'))add('museum',1410,630,125,105);
+ if(has('media'))add('media',1400,489,128,108);
+ if(has('cafe'))add('cafe',1148,758,160,106);
+ if(has('shop'))add('shop',1315,766,127,88);
+ if(has('garden'))add('garden',986,725,158,124);
+ if(has('trophy'))add('trophy',1205,733,30,32);
+
+ if(has('academy'))add('academy',145,720,255,175);
+ if(has('bus'))add('bus',700,870,208,94);
+ if(has('vests'))add('vests',1170,450,39,31);
+ if(has('kit'))add('kit',420,460,37,32);
+ if(has('captain'))add('captain',461,488,10,23);
+ if(has('assistant'))add('assistant',685,540,27,28);
+ if(has('keeper'))add('keeper',1178,378,33,28);
+ if(has('coach'))add('coach',1270,463,35,29);
+ if(has('scout'))add('scout',1041,503,12,25);
+ if(has('star'))add('star',508,521,18,25);
+ if(has('fans'))add('fans',805,738,70,48);
+ if(has('legends'))add('legends',520,798,150,112);
+ return nodes.sort((a,b)=>(a.y+a.h)-(b.y+b.h));
+}
+
+function sceneImage(n){
+ const item=known.get(n.id),name=item?.name||'Din første bane';
+ const attrs=item?`class="world-object" data-action="inspect-upgrade" data-id="${n.id}" role="button" tabindex="0" aria-label="${esc(name)}"`:'';
+ return `<g ${attrs} data-upgrade="${n.id}" data-includes="${n.includes.join(' ')}"><title>${esc(name)}</title><image href="${ART_ROOT}${n.art}.webp" x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" preserveAspectRatio="xMidYMax meet"/></g>`;
+}
+export function world(k){
+ const count=ITEMS.filter(i=>k.purchases[i.id]).length;
+ const primary=/^#[0-9a-f]{6}$/i.test(k.club.primary)?k.club.primary:'#174d3d';
+ const secondary=/^#[0-9a-f]{6}$/i.test(k.club.secondary)?k.club.secondary:'#d5b366';
+ return `<div class="club-landscape" style="--club:${primary};--second:${secondary}"><div class="landscape-caption"><span class="club-colours" aria-label="Dine klubfarver"></span><div><span>${clubStage(k)}</span><strong>${esc(k.club.name)}</strong></div><b>${count}<small> / 48</small></b></div><div class="landscape-viewport"><svg class="club-illustration" viewBox="0 0 1536 1024" role="group" aria-label="${esc(k.club.name)}: ${count} byggede forbedringer" xmlns="http://www.w3.org/2000/svg"><image href="${ART_ROOT}terrain.webp" width="1536" height="1024"/>${ITEMS.every(i=>k.purchases[i.id])?`<image href="${ART_ROOT}endgame-reference.webp" width="1536" height="1024"/><title>Din fuldt udbyggede klub · alle 48 forbedringer</title>`:sceneNodes(k).map(sceneImage).join('')}</svg></div><div class="landscape-controls"><span>${count===ITEMS.length?'Din drømmeklub · alle forbedringer bygget':'Dit anlæg · tryk på en forbedring'}</span><div><button data-action="world-zoom" data-zoom="out" aria-label="Zoom ud">−</button><button data-action="world-zoom" data-zoom="reset" aria-label="Vis hele klubben">Hele klubben</button><button data-action="world-zoom" data-zoom="in" aria-label="Zoom ind">+</button></div></div>${ACHIEVEMENTS.some(a=>k.achievements[a.days])?`<div class="club-honours" aria-label="Dine vundne milepæle">${ACHIEVEMENTS.filter(a=>k.achievements[a.days]).map(a=>`<div>${awardArt(a.days)}<span>${esc(a.name)}</span></div>`).join('')}</div>`:''}</div>`;
 }
