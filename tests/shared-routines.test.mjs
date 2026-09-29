@@ -20,10 +20,10 @@ test('queued taps from three children survive slow saves and keep rewards isolat
   data.checks.morgen[name+'_'+i]=true;complete(data,name,'morgen',now);writes.push(name);
  }));
  await Promise.all(pending);
- assert.equal(writes.length,24);assert.deepEqual(KIDS.map(n=>data.kids[n].stars),[10,9,5]);
+ assert.equal(writes.length,24);assert.deepEqual(KIDS.map(n=>data.kids[n].stars),[10,10,9]);
  const html=sharedRoutines(data,'morgen',now);
  assert.equal((html.match(/FÆRDIG!/g)||[]).length,3);
- assert.ok(html.includes('+10 ⭐'));assert.ok(html.includes('+9 ⭐'));assert.ok(html.includes('+5 ⭐'));
+ assert.ok(html.includes('+10 ⭐'));assert.ok(html.includes('+9 ⭐'));
  assert.ok(KIDS.every(n=>!data.kids[n].routines.aften.finished));
 });
 

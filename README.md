@@ -6,7 +6,7 @@ Videreudvikling af det eksisterende statiske HTML-projekt. Ingen build, npm-inst
 
 - Arthur, Bertil og Vester, hver med rutiner, konto, klubidentitet, køb, opsparingsmål, historik og streak.
 - 8 morgenopgaver og 5 aftenopgaver. Timer starter med knappen eller første afkrydsning, fortsætter efter 10 minutter og overlever genindlæsning.
-- 5 grundstjerner; kumulative bonusser ved strengt under 10/7/5 minutter. Op til 20 rutine-stjerner/dag; sponsorbonus er ekstra og gives kun én gang.
+- 5 grundstjerner. Morgen: +5 i tidsbonus før 11:00, derefter +4/+3/+2/+1/+0 fra henholdsvis 11/12/13/14/15 minutter. Aften: kumulative bonusser ved strengt under 10/7/5 minutter. Op til 20 rutine-stjerner/dag; sponsorbonus er ekstra og gives kun én gang.
 - 48 valgfrie køb i fire uafhængige grene, afhængigheder og visuelt SVG-klubområde med et særskilt element for hvert køb. Klubfarver anvendes på bygninger og badge; spilledragter vises foreløbig som ikoner.
 - Begge rutiner på samme danske kalenderdag tæller til streak. 3/7/14/30/50/100-dages præmier beholdes efter afbrudt streak.
 - Forældrekontor: PIN, stjernejustering med begrundelse, nulstilling af individuel rutine og download af komplet backup.

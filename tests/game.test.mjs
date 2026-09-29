@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {KIDS,ITEMS,TASKS,normalize,reward,complete,buy,dayKey,previousDay,streak,resetRoutine} from '../game.mjs';
+import {KIDS,ITEMS,TASKS,normalize,reward,morningReward,complete,buy,dayKey,previousDay,streak,resetRoutine} from '../game.mjs';
 const now=Date.parse('2026-09-23T12:00:00Z');
 function finish(s,n,t,elapsed=394){s.kids[n].routines[t].start=now-elapsed*1000;TASKS[t].forEach((_,i)=>s.checks[t][n+'_'+i]=true);return complete(s,n,t,now);}
 test('legacy migration retains balances, unknown data, timers, reward dates and correctly shifts hug checks',()=>{
@@ -12,8 +12,8 @@ test('strict time thresholds and untimed/slow routine always receive five',()=>{
 });
 test('all tasks required; reward once; children isolated; reset cannot farm stars',()=>{
  const s=normalize({},now);assert.equal(complete(s,'Arthur','morgen',now),null);
- const r=finish(s,'Arthur','morgen');assert.equal(r.earned,9);assert.equal(s.kids.Arthur.stars,9);assert.equal(s.kids.Bertil.stars,0);assert.equal(finish(s,'Arthur','morgen'),null);
- resetRoutine(s,'Arthur','morgen');assert.equal(finish(s,'Arthur','morgen'),null);assert.equal(s.kids.Arthur.stars,9);
+ const r=finish(s,'Arthur','morgen');assert.equal(r.earned,10);assert.equal(s.kids.Arthur.stars,10);assert.equal(s.kids.Bertil.stars,0);assert.equal(finish(s,'Arthur','morgen'),null);
+ resetRoutine(s,'Arthur','morgen');assert.equal(finish(s,'Arthur','morgen'),null);assert.equal(s.kids.Arthur.stars,10);
  assert.equal(finish(s,'Arthur','aften',900).earned,5);
 });
 test('daily reset preserves progression and starts fresh timers at Danish midnight',()=>{
@@ -25,11 +25,21 @@ test('purchases enforce funds, prerequisite graph and unique ownership',()=>{
 });
 test('streak requires both routines and awards milestones/sponsor only once',()=>{
  const s=normalize({},now),k=s.kids.Arthur;let d=previousDay(s.date);for(let i=0;i<6;i++){k.history[d]={morgen:{},aften:{}};d=previousDay(d);}
- finish(s,'Arthur','morgen');const result=finish(s,'Arthur','aften');assert.equal(streak(k,s.date),7);assert.equal(k.stars,38);assert.ok(k.achievements[7]);assert.equal(result.unlocked.length,1);assert.ok(k.achievements[3]);resetRoutine(s,'Arthur','aften');finish(s,'Arthur','aften');assert.equal(k.stars,38);
+ finish(s,'Arthur','morgen');const result=finish(s,'Arthur','aften');assert.equal(streak(k,s.date),7);assert.equal(k.stars,39);assert.ok(k.achievements[7]);assert.equal(result.unlocked.length,1);assert.ok(k.achievements[3]);resetRoutine(s,'Arthur','aften');finish(s,'Arthur','aften');assert.equal(k.stars,39);
  delete k.history[previousDay(s.date)].aften;assert.equal(streak(k,s.date),1);assert.ok(k.achievements[7]);
 });
 test('catalog has 48 attainable upgrades, acyclic prerequisites and months of progression',()=>{
  assert.equal(ITEMS.length,48);assert.ok(ITEMS.reduce((s,i)=>s+i.price,0)>20*180);const ids=new Set(ITEMS.map(i=>i.id));assert.equal(ids.size,48);
  function walk(id,seen=new Set()){assert.ok(!seen.has(id));const item=ITEMS.find(i=>i.id===id);assert.ok(item);item.requires.forEach(r=>walk(r,new Set([...seen,id])));}
  ITEMS.forEach(i=>walk(i.id));assert.ok(ITEMS.some(i=>i.price<=10&&!i.requires.length));
+});
+
+test('morning bonus drops at each full minute from 11 to 15, evening unchanged',()=>{
+ for(const [seconds,total] of [[null,5],[0,10],[599.999,10],[600,10],[600.001,10],[659.999,10],[660,9],[719.999,9],[720,8],[779.999,8],[780,7],[839.999,7],[840,6],[899.999,6],[900,5],[3600,5]]){
+  const r=morningReward(seconds);assert.equal(r.base,5);assert.equal(r.base+r.bonus,total,String(seconds));
+  const s=normalize({},now);const result=finish(s,'Arthur','morgen',seconds===null?0:seconds);
+  if(seconds!==null){assert.equal(result.earned,total);assert.equal(s.kids.Arthur.history[s.date].morgen.earned,total);assert.equal(finish(s,'Arthur','morgen',seconds),null);}
+ }
+ const s=normalize({},now);assert.equal(finish(s,'Arthur','morgen',600).earned,10);assert.equal(finish(s,'Bertil','aften',600).earned,5);
+ const untimed=normalize({},now);TASKS.morgen.forEach((_,i)=>untimed.checks.morgen['Arthur_'+i]=true);assert.equal(complete(untimed,'Arthur','morgen',now).earned,5);
 });

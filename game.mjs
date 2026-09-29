@@ -17,6 +17,11 @@ export const ACHIEVEMENTS=[{days:3,name:'Godt i gang',icon:'🥉'},{days:7,name:
 export function dayKey(now=Date.now()) { return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Copenhagen',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now)); }
 export function previousDay(day) { const d=new Date(day+'T12:00:00Z'); d.setUTCDate(d.getUTCDate()-1); return d.toISOString().slice(0,10); }
 export function reward(seconds,rules=RULES) {return {base:rules.base,bonus:seconds===null?0:rules.bonuses.reduce((s,b)=>s+(seconds<b.seconds?b.stars:0),0)};}
+// Morning bonus drops after each full minute beyond ten: 11:00 => 4, 15:00 => 0.
+export function morningReward(seconds) {
+ const bonus=seconds===null||!Number.isFinite(seconds)?0:Math.max(0,5-Math.max(0,Math.floor((seconds-600)/60)));
+ return {base:RULES.base,bonus};
+}
 const clone = x=>JSON.parse(JSON.stringify(x));
 export function normalize(input={},now=Date.now()) {
  const s=clone(input || {}); const old=(s.schemaVersion||0)<4;
@@ -50,7 +55,7 @@ export function ledger(k,amount,label,date){k.ledger.push({amount,label,date});}
 export function complete(s,name,type,now=Date.now()) {
  const k=s.kids[name],r=k.routines[type],day=s.date;
  if(k.history[day]?.[type] || !TASKS[type].every((_,i)=>s.checks[type][name+'_'+i])) return null;
- const seconds=r.start===null?null:Math.max(0,(now-r.start)/1000),p=reward(seconds),earned=p.base+p.bonus;
+ const seconds=r.start===null?null:Math.max(0,(now-r.start)/1000),p=type==='morgen'?morningReward(seconds):reward(seconds),earned=p.base+p.bonus;
  r.finished=true;r.seconds=seconds;k.stars+=earned;k.history[day] ||= {};k.history[day][type]={seconds,earned,...p};
  k[type==='morgen'?'lastMorningRewardDate':'lastEveningRewardDate']=day;
  ledger(k,earned,type==='morgen'?'Morgen gennemført':'Aften gennemført',day);
