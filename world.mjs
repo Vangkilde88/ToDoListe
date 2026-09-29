@@ -16,7 +16,7 @@ export function upgradeArt(item,k){k=palette(k);let art=asset(item.id,k,true);co
 export function world(raw){
  const k=palette(raw),p=k.purchases,has=id=>!!p[id],c=k.club.primary,a=k.club.secondary;
  const grown=has('stand')||has('arena'),elite=has('arena')||has('final');
- let s=`<svg class="club-illustration" viewBox="-135 -150 1430 905" role="img" aria-label="${esc(k.club.name)}: ${clubStage(k).toLocaleLowerCase('da')}, ${Object.keys(p).length} byggede forbedringer" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="club-land" x2=".3" y2="1"><stop stop-color="#e9efe6"/><stop offset="1" stop-color="#bacfbb"/></linearGradient><radialGradient id="club-light"><stop stop-color="#fcf2bc" stop-opacity=".26"/><stop offset="1" stop-color="#fcf2bc" stop-opacity="0"/></radialGradient></defs><rect x="-135" y="-150" width="1430" height="905" fill="url(#club-land)"/>`;
+ let s=`<svg class="club-illustration" viewBox="-135 -150 1430 905" role="group" aria-label="${esc(k.club.name)}: ${clubStage(k).toLocaleLowerCase('da')}, ${Object.keys(p).length} byggede forbedringer" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="club-land" x2=".3" y2="1"><stop stop-color="#e9efe6"/><stop offset="1" stop-color="#bacfbb"/></linearGradient><radialGradient id="club-light"><stop stop-color="#fcf2bc" stop-opacity=".26"/><stop offset="1" stop-color="#fcf2bc" stop-opacity="0"/></radialGradient></defs><rect x="-135" y="-150" width="1430" height="905" fill="url(#club-land)"/>`;
  // Continuous parkland, roads and planting; no floating island or disconnected ground.
  s+=plane(-385,-315,930,805,0,'#adc49f')+plane(-340,-285,855,730,0,'#bdd1ae');
  s+=plane(-330,380,850,46,0,'#879592')+line([[-330,403,1],[520,403,1]],'#d4d9c5',1.4);
@@ -58,6 +58,7 @@ export function world(raw){
  if(k.achievements[30])add(390,block(55,360,24,10,31,'#314955','#e4d19c')+poly([[60,371,25],[65,371,28],[69,371,26],[73,371,28],[78,371,25],[75,371,21],[74,371,10],[64,371,10],[63,371,21]],a));
  if(k.achievements[50])add(420,block(90,360,18,18,17,'#455e64','#d6c58c')+ball(99,369,24,true));
  if(k.achievements[100])add(450,block(135,355,23,23,19,'#5b7274','#c6c9b0')+`<g transform="translate(0 -18)">${person(147,367,'#b39c62','#b39c62',1.6)}</g>`);
+ add(510,`<g class="bank-building" role="button" tabindex="0" data-action="bank" aria-label="Åbn Stjernebanken"><title>Stjernebanken · 10 % daglig rente</title>${plane(345,282,105,85,0,'#d7d0b9')}${building(355,290,80,55,55,'#285647','#d5b666')}${label(395,347,36,'BANK',12,'#ffe6a5')}${star(395,317,62,9,'#e1be67')}</g>`);
  objects.sort((a,b)=>a.depth-b.depth);s+=objects.map(o=>o.html).join('');
  // Foreground planting frames the stadium without covering the pitch.
  for(let i=0;i<9;i++)s+=tree(-280+i*93,453,.8+(i%2)*.25);

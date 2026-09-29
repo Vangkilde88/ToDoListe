@@ -1,3 +1,4 @@
+import {settleBank} from './bank.mjs';
 // Pure game rules shared by the browser and migration/regression tests.
 export const KIDS = ['Arthur', 'Bertil', 'Vester'];
 export const RULES = { base: 5, bonuses: [{seconds:600,stars:2},{seconds:420,stars:2},{seconds:300,stars:1}] };
@@ -33,6 +34,7 @@ export function normalize(input={},now=Date.now()) {
   k.stars=Number.isFinite(k.stars)?Math.max(0,k.stars):0;
   k.club ||= {name:name==='Arthur'?'Arthur United':name+' FC',primary:'#285bdf',secondary:'#f6ce60',logo:'🛡️',created:false};
   k.purchases ||= {}; k.history ||= {}; k.achievements ||= {}; k.ledger ||= [];
+  settleBank(k,dayKey(now));
   k.routines ||= {}; k.streak ||= 0; k.bestStreak ||= 0;
   for(const type of ['morgen','aften']) {
    const field=type==='morgen'?'lastMorningRewardDate':'lastEveningRewardDate';

@@ -48,3 +48,9 @@ Belønningen vises inde i den færdige drengs kolonne uden dialog eller konfetti
 Klubområdet bruger nu et fælles isometrisk koordinatsystem i `club-art.mjs`. Alle 48 opgraderinger har tegnede vektoraktiver; ingen emojis bruges som bygninger, spillere eller udstyr. Tribuner har individuelle sæder, trapper, rækværk og tagsektioner. Arenatrinene omslutter banen med endetribuner og hjørnetårne. Klubfarver bruges til sæder, tage, spillertrøjer og facadedetaljer. Forældede bygningstrin erstattes visuelt af deres efterfølgere.
 
 Butikkens illustrationer og købsdialogen bruger samme grafik som klubområdet. Grafikken ændrer ikke køb, priser, beholdninger eller lagring. 13 tests består, inklusive alle aktiv-ID'er og rendering af stadier. Tre visuelle stadier er renderkontrolleret fra SVG: tom bane, lokalstadion og fuldt anlæg. Se `docs/stadium-development.png`. iPad Safari er ikke særskilt browserkontrolleret.
+
+## Stjernebanken
+
+Hvert barn har en separat bank med 10 % daglig spillerente ved dansk midnat. Banken starter på nul; eksisterende køb og stjerner bevares. Indbetaling og hævning sker i hele stjerner gennem samme transaktion som andre gemmehandlinger. Saldo, indbetalinger, hævninger og renter opbevares i hundrededele; daglig rente afrundes til nærmeste hundrededel. Renter fra lukkede dage tilskrives ved næste normalisering og gemmes ved forbindelse eller næste transaktion. Gentagen åbning eller samtidige gemninger giver ikke dobbelt rente. Historikken viser de seneste 20 af højst 60 gemte bankposteringer; totalerne bevares.
+
+Banken findes under barnets klub på startskærmen, i navigationen og som en gratis klikbar bygning ved stadionet. Prognosen antager uændret saldo uden ind- og udbetalinger.
